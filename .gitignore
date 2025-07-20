@@ -49,21 +49,21 @@ Thumbs.db
 *.log
 logs/
 
-# Database
-*.db
-*.sqlite
-*.sqlite3
+# Database - COMMENTED OUT để cho phép push
+# *.db
+# *.sqlite
+# *.sqlite3
 
-# Model files (nếu quá lớn)
-*.h5
-*.hdf5
+# Model files - CHỈ ignore file quá lớn
+# *.h5
+# *.hdf5
 *.pkl
 *.pickle
 
-# Data files
-data/signatures/
-data/test/
-data/demo_*/
+# Data files - COMMENTED OUT để cho phép push data
+# data/signatures/
+# data/test/
+# data/demo_*/
 
 # Temporary files
 temp/
@@ -83,3 +83,11 @@ htmlcov/
 .coverage
 .coverage.*
 coverage.xml
+
+# pytest
+.pytest_cache/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
