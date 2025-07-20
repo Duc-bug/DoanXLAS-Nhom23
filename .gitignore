@@ -49,18 +49,18 @@ Thumbs.db
 *.log
 logs/
 
-# Database - COMMENTED OUT để cho phép push
+# Database - Cho phép push database
 # *.db
 # *.sqlite
 # *.sqlite3
 
-# Model files - CHỈ ignore file quá lớn
+# Model files - Cho phép push model files
 # *.h5
 # *.hdf5
 *.pkl
 *.pickle
 
-# Data files - COMMENTED OUT để cho phép push data
+# Data files - Cho phép push tất cả data
 # data/signatures/
 # data/test/
 # data/demo_*/
