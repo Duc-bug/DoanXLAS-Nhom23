@@ -12,7 +12,7 @@ from streamlit_drawable_canvas import st_canvas  # type: ignore
 from utils.image_processor import SignatureProcessor
 from utils.database import SignatureDatabase
 from model.simple_model import SiameseNetwork  # Dùng simple model
-from model.trainer import SignatureTrainer
+
 
 # Cấu hình trang
 st.set_page_config(
