@@ -4,11 +4,10 @@
 
 ## 🚀 Tính năng
 
-- ✅ Đăng ký và quản lý chữ ký mẫu
-- ✅ Xác minh chữ ký với AI
-- ✅ Vẽ chữ ký trực tiếp trên web
-- ✅ Thống kê và lịch sử xác minh
-- ✅ Huấn luyện mô hình tùy chỉnh
+-  Đăng ký và quản lý chữ ký mẫu
+-  Vẽ chữ ký trực tiếp trên web
+
+
 
 ## ⚡ Cài đặt và chạy
 
@@ -40,7 +39,7 @@ streamlit run app.py
 
 ## 🛠️ Yêu cầu
 
-- Python 3.8+
+- Python 3.12
 - RAM: 4GB+ 
 - CPU hỗ trợ AVX
 
