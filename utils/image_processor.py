@@ -152,38 +152,21 @@ class SignatureProcessor:
             return np.zeros(self.target_size[0] * self.target_size[1] + 64 + 5)
     
     def calculate_similarity(self, features1, features2):
-        """
-        Tính độ tương đồng giữa hai tập đặc trưng
-        """
-        try:
-            # Đảm bảo features có cùng kích thước
-            min_length = min(len(features1), len(features2))
-            features1 = features1[:min_length]
-            features2 = features2[:min_length]
-            
-            # Cosine similarity
-            dot_product = np.dot(features1, features2)
-            norm1 = np.linalg.norm(features1)
-            norm2 = np.linalg.norm(features2)
-            
-            if norm1 == 0 or norm2 == 0:
-                return 0.0
-            
-            cosine_sim = dot_product / (norm1 * norm2)
-            
-            # Euclidean distance (normalized)
-            euclidean_dist = np.linalg.norm(features1 - features2)
-            max_possible_dist = np.sqrt(len(features1) * 2)  # Max distance for normalized features
-            euclidean_sim = 1 - (euclidean_dist / max_possible_dist)
-            
-            # Kết hợp cả hai metric
-            similarity = (cosine_sim + euclidean_sim) / 2
-            
-            return max(0, min(1, similarity))  # Clamp về [0, 1]
-            
-        except Exception as e:
-            print(f"Lỗi tính similarity: {str(e)}")
-            return 0.0
+        """So sánh đơn giản bằng Euclidean distance - KHÔNG dùng AI"""
+        # Chuẩn hóa features
+        from sklearn.preprocessing import StandardScaler
+        scaler = StandardScaler()
+        
+        f1_scaled = scaler.fit_transform(features1.reshape(1, -1))[0]
+        f2_scaled = scaler.transform(features2.reshape(1, -1))[0]
+        
+        # Tính khoảng cách Euclidean
+        distance = np.linalg.norm(f1_scaled - f2_scaled)
+        max_distance = np.sqrt(len(features1))
+        
+        # Chuyển thành similarity (0-1)
+        similarity = 1 - (distance / max_distance)
+        return max(0, min(1, similarity))
     
     def visualize_signature(self, image, title="Chữ ký"):
         """
