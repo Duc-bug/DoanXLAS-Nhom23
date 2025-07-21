@@ -4,10 +4,9 @@ import numpy as np
 import os
 from PIL import Image
 import io
-import matplotlib.pyplot as plt
 import pandas as pd
 import plotly.express as px
-from streamlit_drawable_canvas import st_canvas
+from streamlit_drawable_canvas import st_canvas  # type: ignore
 
 # Import các module tự tạo
 from utils.image_processor import SignatureProcessor
@@ -415,8 +414,8 @@ class SignatureApp:
                         avg_similarity = np.mean([s['similarity'] for s in similarities])
                         
                         # Ngưỡng quyết định (có thể điều chỉnh)
-                        threshold = 0.7
-                        is_genuine = best_match['similarity'] > threshold
+                        threshold = 0.75
+                        is_genuine = best_match['similarity'] >= threshold and avg_similarity >= (threshold - 0.05)
                         
                         # Hiển thị kết quả
                         if is_genuine:
@@ -634,10 +633,10 @@ class SignatureApp:
                                             if similarities:
                                                 max_sim = max(similarities)
                                                 avg_sim = np.mean(similarities)
-                                                threshold = 0.7
+                                                threshold = 0.75
                                                 
-                                                # Hiển thị kết quả
-                                                if max_sim > threshold:
+                                                # Hiển thị kết quả - yêu cầu cả max và avg đều cao
+                                                if max_sim >= threshold and avg_sim >= (threshold - 0.05):
                                                     st.markdown(f"""
                                                     <div class="result-box success-box">
                                                         <h4>✅ CHỮ KÝ HỢP LỆ</h4>
@@ -658,7 +657,7 @@ class SignatureApp:
                                                 
                                                 # Lưu lịch sử xác minh
                                                 self.db.add_verification_log(
-                                                    user['id'], max_sim, max_sim > threshold
+                                                    user['id'], max_sim, max_sim >= threshold and avg_sim >= (threshold - 0.05)
                                                 )
                                             else:
                                                 st.warning("⚠️ Không thể so sánh - Lỗi đặc trưng mẫu!")
@@ -898,8 +897,8 @@ class SignatureApp:
                     fig = px.histogram(df, x='similarity_percent', nbins=20,
                                      title="Phân Bố Độ Tương Đồng",
                                      labels={'similarity_percent': 'Độ Tương Đồng (%)', 'count': 'Số Lượng'})
-                    fig.add_vline(x=70, line_dash="dash", line_color="red", 
-                                annotation_text="Ngưỡng chấp nhận (70%)")
+                    fig.add_vline(x=75, line_dash="dash", line_color="red", 
+                                annotation_text="Ngưỡng chấp nhận (75%)")
                     st.plotly_chart(fig, use_container_width=True)
         else:
             st.info("ℹ️ Chưa có dữ liệu xác minh nào.")
@@ -914,7 +913,7 @@ class SignatureApp:
             
             threshold = st.slider(
                 "Ngưỡng chấp nhận chữ ký (%)",
-                min_value=50, max_value=95, value=70,
+                min_value=60, max_value=95, value=75,
                 help="Độ tương đồng tối thiểu để chữ ký được coi là hợp lệ"
             )
             
