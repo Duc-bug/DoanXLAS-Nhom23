@@ -469,8 +469,8 @@ class SignatureApp:
         
         st.info("✏️ Sử dụng chuột hoặc bút cảm ứng để vẽ chữ ký của bạn")
         
-        # Điều khiển canvas
-        st.markdown("### 🎮 Điều Khiển")
+     
+       
         col1, col2, col3 = st.columns(3)
         
         with col1:
@@ -518,7 +518,7 @@ class SignatureApp:
                     try:
                         # Xử lý ảnh
                         processed = self.processor.preprocess_image(gray_img)
-                        st.image(processed, caption="Ảnh được tối ưu hóa cho AI", use_column_width=True, clamp=True)
+                        st.image(processed, caption="Ảnh được tối ưu hóa", use_column_width=True, clamp=True)
                         
                         # Thêm separator
                         st.markdown("---")
