@@ -1,14 +1,13 @@
-# 🖋️ Ứng Dụng Nhận Diện Chữ Ký AI
+# 🖋️ Ứng Dụng Nhận Diện Chữ Ký
 
-Ứng dụng AI nhận diện và xác minh chữ ký sử dụng Siamese Network và Streamlit.
+Ứng dụng  nhận diện và xác minh chữ ký sử dụng Siamese Network và Streamlit.
 
 ## 🚀 Tính năng
 
-- ✅ Đăng ký và quản lý chữ ký mẫu
-- ✅ Xác minh chữ ký với AI
-- ✅ Vẽ chữ ký trực tiếp trên web
-- ✅ Thống kê và lịch sử xác minh
-- ✅ Huấn luyện mô hình tùy chỉnh
+-  Đăng ký và quản lý chữ ký mẫu
+-  Vẽ chữ ký trực tiếp trên web
+
+
 
 ## ⚡ Cài đặt và chạy
 
@@ -40,7 +39,7 @@ streamlit run app.py
 
 ## 🛠️ Yêu cầu
 
-- Python 3.8+
+- Python 3.12
 - RAM: 4GB+ 
 - CPU hỗ trợ AVX
 
@@ -48,7 +47,7 @@ streamlit run app.py
 
 ```
 app_nhan_dien_chu_ky/
-├── model/               # Mô hình AI
+├── model/               
 ├── data/               # Database và ảnh
 ├── utils/              # Tiện ích xử lý
 ├── app.py              # Ứng dụng chính
@@ -62,14 +61,11 @@ app_nhan_dien_chu_ky/
 2. **Đăng ký mẫu**: Upload 3-5 ảnh chữ ký mẫu
 3. **Xác minh**: Upload ảnh để kiểm tra độ tương tự
 4. **Vẽ chữ ký**: Vẽ trực tiếp trên canvas
-5. **Xem thống kê**: Dashboard và lịch sử chi tiết
 
-## 🤖 Mô hình AI
 
-- **Kiến trúc**: Siamese Network với CNN
-- **Input**: Ảnh 128x128 grayscale  
-- **Output**: Độ tương tự 0-100%
-- **Ngưỡng mặc định**: 80% (max) + 75% (avg) - NGHIÊM NGẶT
+
+
+
 
 ## 📝 License
 
