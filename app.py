@@ -82,7 +82,7 @@ class SignatureApp:
     
     def main(self):
         # Header chính
-        st.markdown('<h1 class="main-header">🖋️ Ứng Dụng Nhận Diện Chữ Ký bằng AI</h1>', unsafe_allow_html=True)
+        st.markdown('<h1 class="main-header">🖋️ Ứng Dụng Nhận Diện Chữ Ký</h1>', unsafe_allow_html=True)
         
         # Sidebar navigation
         st.sidebar.title("📋 Menu Chính")
@@ -160,7 +160,7 @@ class SignatureApp:
             self.settings_page()
     
     def home_page(self):
-        st.markdown('<h2 class="section-header">Chào Mừng Đến Với Hệ Thống Nhận Diện Chữ Ký bằng AI</h2>', unsafe_allow_html=True)
+        st.markdown('<h2 class="section-header">Chào Mừng Đến Với Hệ Thống Nhận Diện Chữ Ký</h2>', unsafe_allow_html=True)
         
         col1, col2, col3 = st.columns(3)
         
@@ -168,7 +168,6 @@ class SignatureApp:
             st.markdown("### 🎯 Mục Tiêu")
             st.write("""
             - Phân biệt chữ ký thật và giả
-            - Độ chính xác cao với AI
             - Giao diện dễ sử dụng
             - Quản lý dữ liệu hiệu quả
             """)
@@ -672,28 +671,6 @@ class SignatureApp:
             # Khi chưa vẽ gì
             st.info("🎨 Hãy vẽ chữ ký của bạn trên canvas ở trên")
             
-            # Hiển thị tips
-            with st.expander("💡 Mẹo Để Có Chữ Ký Đẹp"):
-                st.markdown("""
-                **🖱️ Kỹ thuật vẽ:**
-                - Vẽ chậm và đều tay
-                - Giữ nét liền mạch
-                - Kích thước vừa phải (không quá to/nhỏ)
-                
-                **⚙️ Cài đặt tối ưu:**
-                - Độ dày nét: 2-4 (cho chữ ký rõ ràng)
-                - Màu đen (#000000) cho độ tương phản cao
-                - Canvas đủ lớn để vẽ thoải mái
-                
-                **🎯 Lưu ý chất lượng:**
-                - Chữ ký nên có đặc điểm cá nhân rõ rệt
-                - Tránh vẽ quá đơn giản hoặc phức tạp
-                - Thực hành vài lần để quen tay
-                """)
-    
-    
-    
-    
     def settings_page(self):
         st.markdown('<h2 class="section-header">⚙️ Cài Đặt Hệ Thống</h2>', unsafe_allow_html=True)
         
