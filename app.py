@@ -11,7 +11,7 @@ from streamlit_drawable_canvas import st_canvas
 # Import các module tự tạo
 from utils.image_processor import SignatureProcessor
 from utils.database import SignatureDatabase
-from model.simple_model import SiameseNetwork  # Dùng simple model
+
 
 
 # Cấu hình trang
@@ -64,9 +64,6 @@ class SignatureApp:
     def __init__(self):
         self.processor = SignatureProcessor()
         self.db = SignatureDatabase("data/database.db")
-        self.siamese_net = SiameseNetwork()
-        
-        
         # Khởi tạo session state
         if 'current_user' not in st.session_state:
             st.session_state.current_user = None
