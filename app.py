@@ -413,9 +413,11 @@ class SignatureApp:
                         best_match = max(similarities, key=lambda x: x['similarity'])
                         avg_similarity = np.mean([s['similarity'] for s in similarities])
                         
-                        # Ngưỡng quyết định (có thể điều chỉnh)
-                        threshold = 0.75
-                        is_genuine = best_match['similarity'] >= threshold and avg_similarity >= (threshold - 0.05)
+                        # Ngưỡng quyết định (NGHIÊM NGẶT để tránh false positive)
+                        threshold = 0.80  # Tăng lên 80%
+                        min_avg_threshold = 0.75  # Avg phải >= 75%
+                        is_genuine = (best_match['similarity'] >= threshold and 
+                                    avg_similarity >= min_avg_threshold)
                         
                         # Hiển thị kết quả
                         if is_genuine:
@@ -633,10 +635,11 @@ class SignatureApp:
                                             if similarities:
                                                 max_sim = max(similarities)
                                                 avg_sim = np.mean(similarities)
-                                                threshold = 0.75
+                                                threshold = 0.80  # Tăng lên 80%
+                                                min_avg_threshold = 0.75  # Avg phải >= 75%
                                                 
-                                                # Hiển thị kết quả - yêu cầu cả max và avg đều cao
-                                                if max_sim >= threshold and avg_sim >= (threshold - 0.05):
+                                                # Hiển thị kết quả - yêu cầu CẢ max và avg đều cao
+                                                if max_sim >= threshold and avg_sim >= min_avg_threshold:
                                                     st.markdown(f"""
                                                     <div class="result-box success-box">
                                                         <h4>✅ CHỮ KÝ HỢP LỆ</h4>
@@ -657,7 +660,7 @@ class SignatureApp:
                                                 
                                                 # Lưu lịch sử xác minh
                                                 self.db.add_verification_log(
-                                                    user['id'], max_sim, max_sim >= threshold and avg_sim >= (threshold - 0.05)
+                                                    user['id'], max_sim, max_sim >= threshold and avg_sim >= min_avg_threshold
                                                 )
                                             else:
                                                 st.warning("⚠️ Không thể so sánh - Lỗi đặc trưng mẫu!")
@@ -897,8 +900,8 @@ class SignatureApp:
                     fig = px.histogram(df, x='similarity_percent', nbins=20,
                                      title="Phân Bố Độ Tương Đồng",
                                      labels={'similarity_percent': 'Độ Tương Đồng (%)', 'count': 'Số Lượng'})
-                    fig.add_vline(x=75, line_dash="dash", line_color="red", 
-                                annotation_text="Ngưỡng chấp nhận (75%)")
+                    fig.add_vline(x=80, line_dash="dash", line_color="red", 
+                                annotation_text="Ngưỡng chấp nhận (80%)")
                     st.plotly_chart(fig, use_container_width=True)
         else:
             st.info("ℹ️ Chưa có dữ liệu xác minh nào.")
@@ -913,7 +916,7 @@ class SignatureApp:
             
             threshold = st.slider(
                 "Ngưỡng chấp nhận chữ ký (%)",
-                min_value=60, max_value=95, value=75,
+                min_value=70, max_value=95, value=80,
                 help="Độ tương đồng tối thiểu để chữ ký được coi là hợp lệ"
             )
             

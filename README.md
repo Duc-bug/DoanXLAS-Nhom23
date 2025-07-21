@@ -69,7 +69,7 @@ app_nhan_dien_chu_ky/
 - **Kiến trúc**: Siamese Network với CNN
 - **Input**: Ảnh 128x128 grayscale  
 - **Output**: Độ tương tự 0-100%
-- **Ngưỡng mặc định**: 75% (cả max và avg similarity)
+- **Ngưỡng mặc định**: 80% (max) + 75% (avg) - NGHIÊM NGẶT
 
 ## 📝 License
 
