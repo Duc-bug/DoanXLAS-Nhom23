@@ -118,10 +118,6 @@ class SignatureApp:
         # Thêm system status
         st.sidebar.markdown("---")
         st.sidebar.markdown("### 🖥️ Trạng Thái Hệ Thống")
-        
-        model_exists = os.path.exists("model/signature_model.h5")
-        st.sidebar.markdown(f"🤖 Model: {'✅ Có' if model_exists else '❌ Chưa có'}")
-        
         db_size = 0
         if os.path.exists("data/database.db"):
             db_size = os.path.getsize("data/database.db") / 1024  # KB
