@@ -419,6 +419,9 @@ class SignatureApp:
                         is_genuine = (best_match['similarity'] >= threshold and 
                                     avg_similarity >= min_avg_threshold)
                         
+                        # DEBUG: Log để kiểm tra
+                        st.write(f"🔍 DEBUG - Max: {best_match['similarity']:.2%}, Avg: {avg_similarity:.2%}, Threshold: {threshold:.2%}/{min_avg_threshold:.2%}, Result: {is_genuine}")
+                        
                         # Hiển thị kết quả
                         if is_genuine:
                             st.markdown(f"""
@@ -637,6 +640,9 @@ class SignatureApp:
                                                 avg_sim = np.mean(similarities)
                                                 threshold = 0.80  # Tăng lên 80%
                                                 min_avg_threshold = 0.75  # Avg phải >= 75%
+                                                
+                                                # DEBUG: Log để kiểm tra
+                                                st.write(f"🔍 DEBUG DRAW - Max: {max_sim:.2%}, Avg: {avg_sim:.2%}, Threshold: {threshold:.2%}/{min_avg_threshold:.2%}")
                                                 
                                                 # Hiển thị kết quả - yêu cầu CẢ max và avg đều cao
                                                 if max_sim >= threshold and avg_sim >= min_avg_threshold:
