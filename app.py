@@ -163,7 +163,6 @@ class SignatureApp:
             - Đăng ký chữ ký mẫu
             - Xác minh tự động
             - Vẽ chữ ký trực tiếp
-            - Thống kê chi tiết
             """)
         
         with col3:
