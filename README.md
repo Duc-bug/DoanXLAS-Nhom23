@@ -20,7 +20,7 @@ run_app.bat
 ### Cài đặt thủ công
 ```bash
 # Clone repository
-git clone https://github.com/username/app_nhan_dien_chu_ky.git
+git clone https://github.com/Duc-bug/Ai_nhan_dang_chu_ki
 cd app_nhan_dien_chu_ky
 
 # Tạo virtual environment
