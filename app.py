@@ -754,7 +754,7 @@ class SignatureApp:
             
             **🔗 Liên hệ hỗ trợ:**  
             Email: duc.2373401010100@vanlanguni.vn 
-            GitHub: https://github.com/Duc-bug/app_nhan_dien_chu_ky
+            GitHub: https://github.com/Duc-bug/Ai_nhan_dang_chu_ki
             """)
             
             if st.button("🔄 Kiểm Tra Cập Nhật"):
