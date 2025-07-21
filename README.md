@@ -1,6 +1,6 @@
-# 🖋️ Ứng Dụng Nhận Diện Chữ Ký AI
+# 🖋️ Ứng Dụng Nhận Diện Chữ Ký
 
-Ứng dụng AI nhận diện và xác minh chữ ký sử dụng Siamese Network và Streamlit.
+Ứng dụng  nhận diện và xác minh chữ ký sử dụng Siamese Network và Streamlit.
 
 ## 🚀 Tính năng
 
