@@ -117,21 +117,11 @@ class SignatureApp:
                 "📝 Đăng Ký Chữ Ký",
                 "🔍 Xác Minh Chữ Ký",
                 "🎨 Vẽ Chữ Ký",
-                "🤖 Huấn Luyện Mô Hình",
-                "📊 Thống Kê & Lịch Sử",
                 "⚙️ Cài Đặt"
             ]
         )
-        
-        # Thêm quick actions
-        st.sidebar.markdown("---")
-        st.sidebar.markdown("### ⚡ Thao Tác Nhanh")
-        
-        if st.session_state.current_user:
-            if st.sidebar.button("📝 Đăng Ký Nhanh", use_container_width=True):
-                st.session_state.quick_action = "register"
-            if st.sidebar.button("🔍 Xác Minh Nhanh", use_container_width=True):
-                st.session_state.quick_action = "verify"
+      
+      
         
         # Thêm system status
         st.sidebar.markdown("---")
@@ -165,12 +155,7 @@ class SignatureApp:
             self.signature_verification()
         elif page == "🎨 Vẽ Chữ Ký":
             self.draw_signature()
-        elif page == "🤖 Huấn Luyện Mô Hình":
-            self.model_training()
-        elif page == "📊 Thống Kê & Lịch Sử":
-            self.statistics_page()
-        elif page == "🎯 Demo & Hướng Dẫn":
-            self.demo_tutorial_page()
+       
         elif page == "⚙️ Cài Đặt":
             self.settings_page()
     
@@ -184,7 +169,7 @@ class SignatureApp:
             st.write("""
             - Phân biệt chữ ký thật và giả
             - Độ chính xác cao với AI
-            - Giao diện thân thiện
+            - Giao diện dễ sử dụng
             - Quản lý dữ liệu hiệu quả
             """)
         
