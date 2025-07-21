@@ -6,7 +6,7 @@ from PIL import Image
 import io
 import pandas as pd
 import plotly.express as px
-from streamlit_drawable_canvas import st_canvas  # type: ignore
+from streamlit_drawable_canvas import st_canvas  
 
 # Import các module tự tạo
 from utils.image_processor import SignatureProcessor
@@ -73,12 +73,7 @@ class SignatureApp:
         if 'verification_result' not in st.session_state:
             st.session_state.verification_result = None
     
-    def load_model(self):
-        """Load mô hình AI"""
-        model_path = "model/signature_model.h5"
-        if os.path.exists(model_path):
-            return self.siamese_net.load_model(model_path)
-        return False
+    
     
     def main(self):
         # Header chính
@@ -120,9 +115,6 @@ class SignatureApp:
                 "⚙️ Cài Đặt"
             ]
         )
-      
-      
-        
         # Thêm system status
         st.sidebar.markdown("---")
         st.sidebar.markdown("### 🖥️ Trạng Thái Hệ Thống")
