@@ -169,7 +169,6 @@ class SignatureApp:
             st.markdown("### 🔧 Công Nghệ")
             st.write("""
             - Python + Streamlit
-            - TensorFlow/Keras
             - OpenCV
             - SQLite Database
             """)

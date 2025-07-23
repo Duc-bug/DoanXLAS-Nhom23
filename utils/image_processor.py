@@ -109,7 +109,7 @@ class SignatureProcessor:
                 image = image.astype(np.float32)
             
             # Nếu ảnh đã được normalize về [0,1], chuyển về [0,255] cho việc tính gradient
-            if np.max(image) <= 1.0:
+            if np.max(image) <= 0.1:
                 image_255 = (image * 255).astype(np.uint8)
             else:
                 image_255 = image.astype(np.uint8)
