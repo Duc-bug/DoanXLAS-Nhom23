@@ -101,72 +101,189 @@ class SignatureProcessor:
     
     def extract_features(self, image):
         """
-        Trích xuất đặc trưng từ ảnh chữ ký
+        Trích xuất đặc trưng từ ảnh chữ ký - FIXED VERSION
         """
         try:
+            # Validate input
+            if image is None:
+                raise ValueError("Ảnh đầu vào là None")
+            
+            if len(image.shape) != 2:
+                raise ValueError(f"Ảnh phải là grayscale 2D, nhận được shape: {image.shape}")
+            
             # Đảm bảo ảnh đúng định dạng
             if image.dtype != np.float32:
                 image = image.astype(np.float32)
             
-            # Nếu ảnh đã được normalize về [0,1], chuyển về [0,255] cho việc tính gradient
-            if np.max(image) <= 0.1:
+            # Chuyển về [0,255] cho việc tính gradient
+            if np.max(image) <= 1.0:
                 image_255 = (image * 255).astype(np.uint8)
             else:
                 image_255 = image.astype(np.uint8)
             
-            # Histogram của gradient
+            # 1. RAW PIXEL FEATURES (128x128 = 16,384 features)
+            raw_pixels = image.flatten()
+            
+            # 2. GRADIENT FEATURES
+            # Tính gradient bằng Sobel
             grad_x = cv2.Sobel(image_255, cv2.CV_64F, 1, 0, ksize=3)
             grad_y = cv2.Sobel(image_255, cv2.CV_64F, 0, 1, ksize=3)
             
+            # Magnitude và direction
             magnitude = np.sqrt(grad_x**2 + grad_y**2)
             angle = np.arctan2(grad_y, grad_x)
             
-            # Histogram của magnitude
+            # Histogram của magnitude (32 bins)
             mag_hist, _ = np.histogram(magnitude.flatten(), bins=32, range=(0, 255))
+            mag_hist = mag_hist.astype(np.float32)
+            mag_hist = mag_hist / (np.sum(mag_hist) + 1e-8)  # Normalize
             
-            # Histogram của góc
+            # Histogram của góc (32 bins) 
             angle_hist, _ = np.histogram(angle.flatten(), bins=32, range=(-np.pi, np.pi))
+            angle_hist = angle_hist.astype(np.float32)
+            angle_hist = angle_hist / (np.sum(angle_hist) + 1e-8)  # Normalize
             
-            # Các đặc trưng thống kê
-            stats = [
-                np.mean(image),
-                np.std(image),
-                np.min(image),
-                np.max(image),
-                np.sum(image > 0.5) / image.size if np.max(image) <= 1.0 else np.sum(image > 127) / image.size  # Tỷ lệ pixel sáng
-            ]
+            # 3. STATISTICAL FEATURES (5 features)
+            mean_val = np.mean(image)
+            std_val = np.std(image)
+            min_val = np.min(image)
+            max_val = np.max(image)
             
-            # Kết hợp tất cả đặc trưng
+            # Tỷ lệ pixel sáng (threshold = 0.5 cho normalized image)
+            if np.max(image) <= 1.0:
+                bright_ratio = np.sum(image > 0.5) / image.size
+            else:
+                bright_ratio = np.sum(image > 127) / image.size
+            
+            stats = np.array([mean_val, std_val, min_val, max_val, bright_ratio], dtype=np.float32)
+            
+            # 4. KẾT HỢP TẤT CẢ FEATURES
             features = np.concatenate([
-                image.flatten(),  # Raw pixels
-                mag_hist / (np.sum(mag_hist) + 1e-8),  # Normalized gradient magnitude histogram
-                angle_hist / (np.sum(angle_hist) + 1e-8),  # Normalized gradient angle histogram
-                stats            # Statistical features
+                raw_pixels,    # 16,384 features
+                mag_hist,      # 32 features  
+                angle_hist,    # 32 features
+                stats         # 5 features
             ])
+            # Total: 16,384 + 32 + 32 + 5 = 16,453 features
             
-            return features
+            # Validate output
+            if np.any(np.isnan(features)) or np.any(np.isinf(features)):
+                print("⚠️ Features chứa NaN hoặc Inf, đang sửa...")
+                features = np.nan_to_num(features, nan=0.0, posinf=1.0, neginf=0.0)
+            
+            print(f"✅ Trích xuất thành công {len(features)} features")
+            return features.astype(np.float32)
             
         except Exception as e:
-            print(f"Lỗi trích xuất đặc trưng: {str(e)}")
+            print(f"❌ Lỗi trích xuất đặc trưng: {str(e)}")
             # Trả về vector zero như fallback
-            return np.zeros(self.target_size[0] * self.target_size[1] + 64 + 5)
+            fallback_size = self.target_size[0] * self.target_size[1] + 64 + 5  # 16,453
+            return np.zeros(fallback_size, dtype=np.float32)
     
     def calculate_similarity(self, features1, features2):
-        """So sánh đơn giản bằng Euclidean distance - KHÔNG dùng AI"""
-        # Chuẩn hóa features
-        from sklearn.preprocessing import StandardScaler
-        scaler = StandardScaler()
-        
-        f1_scaled = scaler.fit_transform(features1.reshape(1, -1))[0]
-        f2_scaled = scaler.transform(features2.reshape(1, -1))[0]
-        
-        # Tính khoảng cách Euclidean
-        distance = np.linalg.norm(f1_scaled - f2_scaled)
-        max_distance = np.sqrt(len(features1))
-        
-        # Chuyển thành similarity (0-1)
-        similarity = 1 - (distance / max_distance)
-        return max(0, min(1, similarity))
+        """
+        So sánh độ tương đồng - IMPROVED VERSION
+        """
+        try:
+            # Validate inputs
+            if features1 is None or features2 is None:
+                print("❌ Features là None")
+                return 0.0
+            
+            f1 = np.array(features1, dtype=np.float32).flatten()
+            f2 = np.array(features2, dtype=np.float32).flatten()
+            
+            if len(f1) == 0 or len(f2) == 0:
+                print("❌ Features rỗng")
+                return 0.0
+            
+            if len(f1) != len(f2):
+                print(f"❌ Features khác chiều: {len(f1)} vs {len(f2)}")
+                return 0.0
+            
+            # Clean data
+            f1 = np.nan_to_num(f1, nan=0.0, posinf=1.0, neginf=0.0)
+            f2 = np.nan_to_num(f2, nan=0.0, posinf=1.0, neginf=0.0)
+            
+            # Method 1: Cosine Similarity
+            dot_product = np.dot(f1, f2)
+            norm1 = np.linalg.norm(f1)
+            norm2 = np.linalg.norm(f2)
+            
+            if norm1 == 0 or norm2 == 0:
+                cosine_sim = 0.0
+            else:
+                cosine_sim = dot_product / (norm1 * norm2)
+                cosine_sim = max(0, min(1, cosine_sim))
+            
+            # Method 2: Euclidean Similarity với standardization
+            try:
+                # Combine và standardize
+                combined = np.vstack([f1.reshape(1, -1), f2.reshape(1, -1)])
+                scaler = StandardScaler()
+                scaled = scaler.fit_transform(combined)
+                
+                f1_scaled = scaled[0]
+                f2_scaled = scaled[1]
+                
+                # Euclidean distance
+                distance = np.linalg.norm(f1_scaled - f2_scaled)
+                max_distance = np.sqrt(len(f1_scaled))
+                
+                euclidean_sim = 1 - (distance / max_distance)
+                euclidean_sim = max(0, min(1, euclidean_sim))
+                
+            except Exception:
+                euclidean_sim = cosine_sim
+            
+            # Weighted combination
+            final_similarity = 0.6 * cosine_sim + 0.4 * euclidean_sim
+            
+            print(f"🔍 Cosine: {cosine_sim:.4f}, Euclidean: {euclidean_sim:.4f}, Final: {final_similarity:.4f}")
+            
+            return float(final_similarity)
+            
+        except Exception as e:
+            print(f"❌ Lỗi tính similarity: {str(e)}")
+            return 0.0
+    
+    def compare_signatures(self, image1, image2):
+        """
+        So sánh 2 ảnh chữ ký hoàn chỉnh
+        """
+        try:
+            print("🔄 Bắt đầu so sánh chữ ký...")
+            
+            # Preprocess
+            processed1 = self.preprocess_image(image1)
+            processed2 = self.preprocess_image(image2)
+            
+            # Extract features
+            features1 = self.extract_features(processed1)
+            features2 = self.extract_features(processed2)
+            
+            # Calculate similarity
+            similarity = self.calculate_similarity(features1, features2)
+            
+            print(f"✅ Hoàn thành so sánh. Similarity: {similarity:.4f}")
+            
+            return {
+                'similarity': similarity,
+                'processed_image1': processed1,
+                'processed_image2': processed2,
+                'features1': features1,
+                'features2': features2
+            }
+            
+        except Exception as e:
+            print(f"❌ Lỗi so sánh chữ ký: {str(e)}")
+            return {
+                'similarity': 0.0,
+                'processed_image1': np.zeros(self.target_size, dtype=np.float32),
+                'processed_image2': np.zeros(self.target_size, dtype=np.float32), 
+                'features1': np.zeros(16453, dtype=np.float32),
+                'features2': np.zeros(16453, dtype=np.float32)
+            }
     
     def visualize_signature(self, image, title="Chữ ký"):
         """
@@ -183,3 +300,7 @@ class SignatureProcessor:
             plt.show()
         except Exception as e:
             print(f"Lỗi hiển thị ảnh: {str(e)}")
+
+
+if __name__ == "__main__":
+    test_processor()
