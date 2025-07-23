@@ -104,12 +104,19 @@ class SignatureProcessor:
         Trích xuất đặc trưng từ ảnh chữ ký - FIXED VERSION
         """
         try:
+            print(f"🔍 Bắt đầu trích xuất features từ ảnh shape: {image.shape}")
+            
             # Validate input
             if image is None:
                 raise ValueError("Ảnh đầu vào là None")
             
             if len(image.shape) != 2:
                 raise ValueError(f"Ảnh phải là grayscale 2D, nhận được shape: {image.shape}")
+            
+            # Kiểm tra kích thước ảnh
+            if image.shape != self.target_size:
+                print(f"⚠️ Ảnh không đúng kích thước: {image.shape}, resize về {self.target_size}")
+                image = cv2.resize(image, self.target_size, interpolation=cv2.INTER_AREA)
             
             # Đảm bảo ảnh đúng định dạng
             if image.dtype != np.float32:
@@ -121,78 +128,104 @@ class SignatureProcessor:
             else:
                 image_255 = image.astype(np.uint8)
             
+            print(f"📊 Ảnh sau preprocessing: shape={image.shape}, dtype={image.dtype}, min={np.min(image):.3f}, max={np.max(image):.3f}")
+            
             # 1. RAW PIXEL FEATURES (128x128 = 16,384 features)
             raw_pixels = image.flatten()
+            print(f"✅ Raw pixels: {len(raw_pixels)} features")
             
             # 2. GRADIENT FEATURES
-            # Tính gradient bằng Sobel
-            grad_x = cv2.Sobel(image_255, cv2.CV_64F, 1, 0, ksize=3)
-            grad_y = cv2.Sobel(image_255, cv2.CV_64F, 0, 1, ksize=3)
-            
-            # Magnitude và direction
-            magnitude = np.sqrt(grad_x**2 + grad_y**2)
-            angle = np.arctan2(grad_y, grad_x)
-            
-            # Histogram của magnitude (32 bins)
-            mag_hist, _ = np.histogram(magnitude.flatten(), bins=32, range=(0, 255))
-            mag_hist = mag_hist.astype(np.float32)
-            if np.sum(mag_hist) > 0:
-                mag_hist = mag_hist / np.sum(mag_hist)  # Normalize
-            
-            # Histogram của góc (32 bins) 
-            angle_hist, _ = np.histogram(angle.flatten(), bins=32, range=(-np.pi, np.pi))
-            angle_hist = angle_hist.astype(np.float32)
-            if np.sum(angle_hist) > 0:
-                angle_hist = angle_hist / np.sum(angle_hist)  # Normalize
-            
-            # 3. STATISTICAL FEATURES (5 features)
-            mean_val = np.mean(image)
-            std_val = np.std(image)
-            min_val = np.min(image)
-            max_val = np.max(image)
+            try:
+                # Tính gradient bằng Sobel
+                grad_x = cv2.Sobel(image_255, cv2.CV_64F, 1, 0, ksize=3)
+                grad_y = cv2.Sobel(image_255, cv2.CV_64F, 0, 1, ksize=3)
+                
+                # Magnitude và direction
+                magnitude = np.sqrt(grad_x**2 + grad_y**2)
+                angle = np.arctan2(grad_y, grad_x)
+                
+                print(f"✅ Gradient: magnitude shape={magnitude.shape}, angle shape={angle.shape}")
+                
+                # Histogram của magnitude (32 bins)
+                mag_hist, _ = np.histogram(magnitude.flatten(), bins=32, range=(0, 300))  # Tăng range
+                mag_hist = mag_hist.astype(np.float32)
+                if np.sum(mag_hist) > 0:
+                    mag_hist = mag_hist / np.sum(mag_hist)  # Normalize
+                print(f"✅ Magnitude histogram: {len(mag_hist)} bins, sum={np.sum(mag_hist):.3f}")
+                
+                # Histogram của góc (32 bins) 
+                angle_hist, _ = np.histogram(angle.flatten(), bins=32, range=(-np.pi, np.pi))
+                angle_hist = angle_hist.astype(np.float32)
+                if np.sum(angle_hist) > 0:
+                    angle_hist = angle_hist / np.sum(angle_hist)  # Normalize
+                print(f"✅ Angle histogram: {len(angle_hist)} bins, sum={np.sum(angle_hist):.3f}")
+                
+            except Exception as e:
+                print(f"⚠️ Lỗi gradient features: {e}")
+                mag_hist = np.zeros(32, dtype=np.float32)
+                angle_hist = np.zeros(32, dtype=np.float32)
+        
+        # 3. STATISTICAL FEATURES (5 features)
+        try:
+            mean_val = float(np.mean(image))
+            std_val = float(np.std(image))
+            min_val = float(np.min(image))
+            max_val = float(np.max(image))
             
             # Tỷ lệ pixel sáng (threshold = 0.5 cho normalized image)
             if np.max(image) <= 1.0:
-                bright_ratio = np.sum(image > 0.5) / image.size
+                bright_ratio = float(np.sum(image > 0.5) / image.size)
             else:
-                bright_ratio = np.sum(image > 127) / image.size
+                bright_ratio = float(np.sum(image > 127) / image.size)
             
             stats = np.array([mean_val, std_val, min_val, max_val, bright_ratio], dtype=np.float32)
+            print(f"✅ Statistical features: {stats}")
             
-            # 4. KẾT HỢP TẤT CẢ FEATURES
+        except Exception as e:
+            print(f"⚠️ Lỗi statistical features: {e}")
+            stats = np.zeros(5, dtype=np.float32)
+        
+        # 4. KẾT HỢP TẤT CẢ FEATURES
+        try:
             features = np.concatenate([
                 raw_pixels,    # 16,384 features (128x128)
                 mag_hist,      # 32 features  
                 angle_hist,    # 32 features
                 stats         # 5 features
             ])
+            print(f"✅ Kết hợp features: {len(features)} total")
             # Total: 16,384 + 32 + 32 + 5 = 16,453 features
             
-            # Validate output size
-            expected_size = self.target_size[0] * self.target_size[1] + 32 + 32 + 5
-            if len(features) != expected_size:
-                print(f"⚠️ Kích thước features không đúng: {len(features)}, mong đợi: {expected_size}")
-                # Resize nếu cần
-                if len(features) < expected_size:
-                    features = np.pad(features, (0, expected_size - len(features)), 'constant')
-                else:
-                    features = features[:expected_size]
-            
-            # Validate output
-            if np.any(np.isnan(features)) or np.any(np.isinf(features)):
-                print("⚠️ Features chứa NaN hoặc Inf, đang sửa...")
-                features = np.nan_to_num(features, nan=0.0, posinf=1.0, neginf=0.0)
-            
-            print(f"✅ Trích xuất thành công {len(features)} features")
-            return features.astype(np.float32)
-        
         except Exception as e:
-            print(f"❌ Lỗi trích xuất đặc trưng: {str(e)}")
-            import traceback
-            traceback.print_exc()
-            # Trả về vector zero với kích thước chính xác
-            fallback_size = self.target_size[0] * self.target_size[1] + 32 + 32 + 5  # 16,453
-            return np.zeros(fallback_size, dtype=np.float32)
+            print(f"❌ Lỗi kết hợp features: {e}")
+            expected_size = self.target_size[0] * self.target_size[1] + 32 + 32 + 5
+            return np.zeros(expected_size, dtype=np.float32)
+        
+        # Validate output size
+        expected_size = self.target_size[0] * self.target_size[1] + 32 + 32 + 5
+        if len(features) != expected_size:
+            print(f"⚠️ Kích thước features không đúng: {len(features)}, mong đợi: {expected_size}")
+            # Resize nếu cần
+            if len(features) < expected_size:
+                features = np.pad(features, (0, expected_size - len(features)), 'constant')
+            else:
+                features = features[:expected_size]
+        
+        # Validate output
+        if np.any(np.isnan(features)) or np.any(np.isinf(features)):
+            print("⚠️ Features chứa NaN hoặc Inf, đang sửa...")
+            features = np.nan_to_num(features, nan=0.0, posinf=1.0, neginf=0.0)
+        
+        print(f"✅ Trích xuất thành công {len(features)} features")
+        return features.astype(np.float32)
+        
+    except Exception as e:
+        print(f"❌ Lỗi trích xuất đặc trưng: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        # Trả về vector zero với kích thước chính xác
+        fallback_size = self.target_size[0] * self.target_size[1] + 32 + 32 + 5  # 16,453
+        return np.zeros(fallback_size, dtype=np.float32)
     
     def calculate_similarity(self, features1, features2):
         """
@@ -314,6 +347,7 @@ class SignatureProcessor:
             plt.show()
         except Exception as e:
             print(f"Lỗi hiển thị ảnh: {str(e)}")
+
 
 
 if __name__ == "__main__":
