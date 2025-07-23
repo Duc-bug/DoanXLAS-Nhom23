@@ -136,12 +136,14 @@ class SignatureProcessor:
             # Histogram của magnitude (32 bins)
             mag_hist, _ = np.histogram(magnitude.flatten(), bins=32, range=(0, 255))
             mag_hist = mag_hist.astype(np.float32)
-            mag_hist = mag_hist / (np.sum(mag_hist) + 1e-8)  # Normalize
+            if np.sum(mag_hist) > 0:
+                mag_hist = mag_hist / np.sum(mag_hist)  # Normalize
             
             # Histogram của góc (32 bins) 
             angle_hist, _ = np.histogram(angle.flatten(), bins=32, range=(-np.pi, np.pi))
             angle_hist = angle_hist.astype(np.float32)
-            angle_hist = angle_hist / (np.sum(angle_hist) + 1e-8)  # Normalize
+            if np.sum(angle_hist) > 0:
+                angle_hist = angle_hist / np.sum(angle_hist)  # Normalize
             
             # 3. STATISTICAL FEATURES (5 features)
             mean_val = np.mean(image)
@@ -159,12 +161,22 @@ class SignatureProcessor:
             
             # 4. KẾT HỢP TẤT CẢ FEATURES
             features = np.concatenate([
-                raw_pixels,    # 16,384 features
+                raw_pixels,    # 16,384 features (128x128)
                 mag_hist,      # 32 features  
                 angle_hist,    # 32 features
                 stats         # 5 features
             ])
             # Total: 16,384 + 32 + 32 + 5 = 16,453 features
+            
+            # Validate output size
+            expected_size = self.target_size[0] * self.target_size[1] + 32 + 32 + 5
+            if len(features) != expected_size:
+                print(f"⚠️ Kích thước features không đúng: {len(features)}, mong đợi: {expected_size}")
+                # Resize nếu cần
+                if len(features) < expected_size:
+                    features = np.pad(features, (0, expected_size - len(features)), 'constant')
+                else:
+                    features = features[:expected_size]
             
             # Validate output
             if np.any(np.isnan(features)) or np.any(np.isinf(features)):
@@ -173,11 +185,13 @@ class SignatureProcessor:
             
             print(f"✅ Trích xuất thành công {len(features)} features")
             return features.astype(np.float32)
-            
+        
         except Exception as e:
             print(f"❌ Lỗi trích xuất đặc trưng: {str(e)}")
-            # Trả về vector zero như fallback
-            fallback_size = self.target_size[0] * self.target_size[1] + 64 + 5  # 16,453
+            import traceback
+            traceback.print_exc()
+            # Trả về vector zero với kích thước chính xác
+            fallback_size = self.target_size[0] * self.target_size[1] + 32 + 32 + 5  # 16,453
             return np.zeros(fallback_size, dtype=np.float32)
     
     def calculate_similarity(self, features1, features2):
