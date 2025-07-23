@@ -315,3 +315,71 @@ class SignatureDatabase:
             'verifications_count': verifications_count,
             'genuine_rate': genuine_rate
         }
+    
+    def analyze_template_quality(self, user_id, processor):
+        """
+        Phân tích chất lượng các mẫu chữ ký của một người dùng
+        """
+        templates = self.get_template_signatures(user_id)
+        if len(templates) < 2:
+            return None
+        
+        similarities = []
+        quality_scores = []
+        
+        for i, template1 in enumerate(templates):
+            template_similarities = []
+            
+            for j, template2 in enumerate(templates):
+                if i != j and template1['features'] is not None and template2['features'] is not None:
+                    try:
+                        similarity = processor.calculate_similarity(
+                            template1['features'], 
+                            template2['features']
+                        )
+                        template_similarities.append(similarity)
+                        
+                        if i < j:  # Avoid duplicate pairs
+                            similarities.append({
+                                'template1_id': template1['id'],
+                                'template2_id': template2['id'],
+                                'similarity': similarity
+                            })
+                    except:
+                        continue
+            
+            # Điểm chất lượng của mẫu = độ tương đồng trung bình với các mẫu khác
+            if template_similarities:
+                avg_similarity = np.mean(template_similarities)
+                quality_scores.append({
+                    'template_id': template1['id'],
+                    'quality_score': avg_similarity,
+                    'consistency': np.std(template_similarities)  # Độ nhất quán
+                })
+        
+        return {
+            'pairwise_similarities': similarities,
+            'quality_scores': quality_scores,
+            'overall_consistency': np.mean([s['similarity'] for s in similarities]) if similarities else 0,
+            'recommendation': self._get_quality_recommendation(quality_scores, similarities)
+        }
+    
+    def _get_quality_recommendation(self, quality_scores, similarities):
+        """
+        Đưa ra khuyến nghị về chất lượng mẫu
+        """
+        if not quality_scores or not similarities:
+            return "Không đủ dữ liệu để phân tích"
+        
+        avg_quality = np.mean([q['quality_score'] for q in quality_scores])
+        min_quality = min([q['quality_score'] for q in quality_scores])
+        
+        if avg_quality > 0.8:
+            return "✅ Chất lượng mẫu rất tốt - các mẫu nhất quán cao"
+        elif avg_quality > 0.6:
+            if min_quality < 0.5:
+                return "⚠️ Có mẫu chất lượng kém - nên xem xét loại bỏ mẫu có điểm thấp"
+            else:
+                return "✅ Chất lượng mẫu tốt"
+        else:
+            return "❌ Chất lượng mẫu kém - nên đăng ký lại các mẫu chữ ký"

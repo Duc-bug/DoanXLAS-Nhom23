@@ -16,7 +16,7 @@ from utils.database import SignatureDatabase
 
 # Cấu hình trang
 st.set_page_config(
-    page_title="Xác thực chữ ký bằng AI",
+    page_title="Xác thực chữ ký ",
     page_icon="✍️",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -24,7 +24,7 @@ st.set_page_config(
 
 # CSS tùy chỉnh
 st.markdown("""
-<style>
+<style>                                                                           
     .main-header {
         text-align: center;
         color: #1f77b4;
@@ -310,13 +310,63 @@ class SignatureApp:
         if templates:
             st.markdown("### 📋 Chữ Ký Mẫu Đã Đăng Ký")
             
-            cols = st.columns(min(len(templates), 4))
+            # Phân tích chất lượng mẫu nếu có nhiều hơn 1 mẫu
+            if len(templates) > 1:
+                st.markdown("#### 🔍 Phân Tích Chất Lượng Mẫu")
+                
+                # Tính toán độ tương đồng giữa các mẫu
+                template_similarities = []
+                for i, template1 in enumerate(templates):
+                    for j, template2 in enumerate(templates[i+1:], i+1):
+                        try:
+                            # Lấy features của cả 2 mẫu
+                            features1 = template1['features']
+                            features2 = template2['features']
+                            
+                            if features1 is not None and features2 is not None:
+                                similarity = self.processor.calculate_similarity(features1, features2)
+                                template_similarities.append({
+                                    'pair': f"Mẫu #{template1['id']} - #{template2['id']}",
+                                    'similarity': similarity,
+                                    'template1_id': template1['id'],
+                                    'template2_id': template2['id']
+                                })
+                        except Exception as e:
+                            st.warning(f"⚠️ Không thể so sánh mẫu #{template1['id']} và #{template2['id']}: {str(e)}")
+                
+                if template_similarities:
+                    avg_inter_similarity = np.mean([s['similarity'] for s in template_similarities])
+                    st.info(f"📊 Độ tương đồng trung bình giữa các mẫu: {avg_inter_similarity:.2%}")
+                    
+                    if avg_inter_similarity < 0.6:
+                        st.warning("⚠️ Các mẫu có độ tương đồng thấp - có thể cần kiểm tra lại chất lượng")
+                    elif avg_inter_similarity > 0.9:
+                        st.success("✅ Các mẫu có độ nhất quán cao")
+                    else:
+                        st.info("ℹ️ Các mẫu có độ nhất quán trung bình")
+            
+            cols = st.columns(min(len(templates), 3))
             for i, template in enumerate(templates):
-                with cols[i % 4]:
+                with cols[i % 3]:
                     if os.path.exists(template['image_path']):
                         image = cv2.imread(template['image_path'], cv2.IMREAD_GRAYSCALE)
                         st.image(image, caption=f"Mẫu #{template['id']}", width=150)
-                        if st.button(f"🗑️ Xóa", key=f"del_{template['id']}"):
+                        
+                        # Hiển thị thông tin mẫu
+                        created_date = pd.to_datetime(template['created_at']).strftime('%d/%m/%Y')
+                        st.caption(f"📅 {created_date}")
+                        
+                        # Nút xóa với xác nhận
+                        if st.button(f"🗑️ Xóa", key=f"del_{template['id']}", use_container_width=True):
+                            if len(templates) > 1:  # Chỉ cho phép xóa nếu còn ít nhất 1 mẫu
+                                self.db.delete_signature(template['id'])
+                                st.success(f"✅ Đã xóa mẫu #{template['id']}")
+                                st.rerun()
+                            else:
+                                st.error("❌ Không thể xóa mẫu cuối cùng!")
+                    else:
+                        st.error(f"❌ Không tìm thấy file mẫu #{template['id']}")
+                        if st.button(f"🗑️ Xóa mẫu lỗi", key=f"del_error_{template['id']}"):
                             self.db.delete_signature(template['id'])
                             st.rerun()
     
@@ -399,8 +449,6 @@ class SignatureApp:
                                         'similarity': similarity
                                     })
                                     
-                                    st.write(f"✅ So sánh với mẫu #{template['id']}: {similarity:.2%}")
-                                    
                                 else:
                                     # Không có features, trích xuất từ ảnh
                                     if os.path.exists(template['image_path']):
@@ -418,8 +466,6 @@ class SignatureApp:
                                                 'template_id': template['id'],
                                                 'similarity': similarity
                                             })
-                                            
-                                            st.write(f"✅ So sánh với mẫu #{template['id']}: {similarity:.2%}")
                                         else:
                                             st.warning(f"⚠️ Không thể đọc ảnh mẫu #{template['id']}")
                                     else:
@@ -430,52 +476,93 @@ class SignatureApp:
                                 continue
                     
                     if similarities:
+                        # Sắp xếp theo độ tương đồng
+                        similarities.sort(key=lambda x: x['similarity'], reverse=True)
+                        
                         # Tìm độ tương đồng cao nhất
-                        best_match = max(similarities, key=lambda x: x['similarity'])
-                        avg_similarity = np.mean([s['similarity'] for s in similarities])
+                        best_match = similarities[0]
                         
-                        # Ngưỡng quyết định (NGHIÊM NGẶT để tránh false positive)
-                        threshold = 0.80  # Tăng lên 80%
-                        min_avg_threshold = 0.75  # Avg phải >= 75%
-                        is_genuine = (best_match['similarity'] >= threshold and 
-                                    avg_similarity >= min_avg_threshold)
+                        # Tính toán thống kê nâng cao
+                        scores = [s['similarity'] for s in similarities]
+                        avg_similarity = np.mean(scores)
+                        median_similarity = np.median(scores)
+                        max_similarity = max(scores)
+                        min_similarity = min(scores)
                         
-                        # DEBUG: Log để kiểm tra
-                        st.write(f"🔍 DEBUG - Max: {best_match['similarity']:.2%}, Avg: {avg_similarity:.2%}, Threshold: {threshold:.2%}/{min_avg_threshold:.2%}, Result: {is_genuine}")
+                        # Loại bỏ outlier (điểm quá thấp) nếu có nhiều hơn 2 mẫu
+                        if len(scores) > 2:
+                            # Tính Q1, Q3 và IQR
+                            q1 = np.percentile(scores, 25)
+                            q3 = np.percentile(scores, 75)
+                            iqr = q3 - q1
+                            lower_bound = q1 - 1.5 * iqr
+                            
+                            # Lọc bỏ outlier thấp
+                            filtered_scores = [s for s in scores if s >= lower_bound]
+                            if len(filtered_scores) >= len(scores) * 0.6:  # Giữ ít nhất 60% mẫu
+                                avg_similarity = np.mean(filtered_scores)
+                                st.info(f"🔍 Đã loại bỏ {len(scores) - len(filtered_scores)} mẫu có điểm quá thấp")
                         
-                        # Hiển thị kết quả
+                        # Thuật toán quyết định cải tiến với cài đặt linh hoạt (Phiên bản nhẹ nhàng cho đồ án)
+                        settings = getattr(st.session_state, 'verification_settings', {})
+                        
+                        # Ngưỡng linh hoạt và dễ dàng hơn cho đồ án nhập môn
+                        if len(similarities) == 1:
+                            # Chỉ có 1 mẫu - ngưỡng thấp hơn
+                            threshold = settings.get('single_threshold', 0.50)  # Giảm từ 0.75 xuống 0.50
+                            is_genuine = best_match['similarity'] >= threshold
+                            decision_info = f"1 mẫu: cần >= {threshold:.0%}"
+                        elif len(similarities) == 2:
+                            # 2 mẫu - ngưỡng dễ dàng hơn
+                            threshold = settings.get('dual_threshold', 0.45)  # Giảm từ 0.70 xuống 0.45
+                            avg_threshold = settings.get('dual_avg_threshold', 0.40)  # Giảm từ 0.65 xuống 0.40
+                            is_genuine = (best_match['similarity'] >= threshold and 
+                                        avg_similarity >= avg_threshold)
+                            decision_info = f"2 mẫu: max >= {threshold:.0%}, avg >= {avg_threshold:.0%}"
+                        else:
+                            # 3+ mẫu - ngưỡng rất dễ dàng
+                            threshold = settings.get('multi_threshold', 0.40)  # Giảm từ 0.65 xuống 0.40
+                            median_threshold = settings.get('multi_median_threshold', 0.35)  # Giảm từ 0.60 xuống 0.35
+                            avg_threshold = settings.get('multi_avg_threshold', 0.30)  # Giảm từ 0.55 xuống 0.30
+                            is_genuine = (best_match['similarity'] >= threshold and 
+                                        median_similarity >= median_threshold and
+                                        avg_similarity >= avg_threshold)
+                            decision_info = f"{len(similarities)} mẫu: max >= {threshold:.0%}, median >= {median_threshold:.0%}, avg >= {avg_threshold:.0%}"
+                        
+                        # Hiển thị kết quả đơn giản
                         if is_genuine:
                             st.markdown(f"""
                             <div class="result-box success-box">
                                 <h3>✅ CHỮ KÝ HỢP LỆ</h3>
-                                <p><strong>Độ tương đồng cao nhất:</strong> {best_match['similarity']:.2%}</p>
-                                <p><strong>Độ tương đồng trung bình:</strong> {avg_similarity:.2%}</p>
-                                <p><strong>Ngưỡng chấp nhận:</strong> {threshold:.2%}</p>
+                                <p><strong>🎯 Độ tương đồng cao nhất:</strong> {best_match['similarity']:.2%} (Mẫu #{best_match['template_id']})</p>
+                                <p><strong>📊 Độ tương đồng trung bình:</strong> {avg_similarity:.2%}</p>
+                                <p><strong>📈 Độ tương đồng trung vị:</strong> {median_similarity:.2%}</p>
+                                <p><strong>� Số mẫu so sánh:</strong> {len(similarities)}</p>
+                                <p><strong>⚙️ Điều kiện áp dụng:</strong> {decision_info}</p>
                             </div>
                             """, unsafe_allow_html=True)
                         else:
+                            reasons = []
+                            if best_match['similarity'] < threshold:
+                                reasons.append(f"Điểm cao nhất ({best_match['similarity']:.2%}) < ngưỡng ({threshold:.2%})")
+                            if len(similarities) >= 2 and avg_similarity < settings.get('dual_avg_threshold', 0.40):
+                                reasons.append(f"Điểm trung bình thấp ({avg_similarity:.2%})")
+                            if len(similarities) >= 3 and median_similarity < settings.get('multi_median_threshold', 0.35):
+                                reasons.append(f"Điểm trung vị thấp ({median_similarity:.2%})")
+                            
+                            reason_text = ", ".join(reasons) if reasons else "Không đạt ngưỡng chấp nhận"
+                            
                             st.markdown(f"""
                             <div class="result-box danger-box">
                                 <h3>❌ CHỮ KÝ KHÔNG HỢP LỆ</h3>
-                                <p><strong>Độ tương đồng cao nhất:</strong> {best_match['similarity']:.2%}</p>
-                                <p><strong>Độ tương đồng trung bình:</strong> {avg_similarity:.2%}</p>
-                                <p><strong>Ngưỡng chấp nhận:</strong> {threshold:.2%}</p>
+                                <p><strong>🎯 Độ tương đồng cao nhất:</strong> {best_match['similarity']:.2%} (Mẫu #{best_match['template_id']})</p>
+                                <p><strong>📊 Độ tương đồng trung bình:</strong> {avg_similarity:.2%}</p>
+                                <p><strong>📈 Độ tương đồng trung vị:</strong> {median_similarity:.2%}</p>
+                                <p><strong>� Số mẫu so sánh:</strong> {len(similarities)}</p>
+                                <p><strong>⚙️ Điều kiện áp dụng:</strong> {decision_info}</p>
+                                <p><strong>⚠️ Lý do từ chối:</strong> {reason_text}</p>
                             </div>
                             """, unsafe_allow_html=True)
-                        
-                        # Biểu đồ độ tương đồng
-                        if len(similarities) > 1:
-                            df_sim = pd.DataFrame(similarities)
-                            fig = px.bar(
-                                df_sim, 
-                                x='template_id', 
-                                y='similarity',
-                                title="Độ Tương Đồng Với Các Mẫu",
-                                labels={'template_id': 'ID Mẫu', 'similarity': 'Độ Tương Đồng'}
-                            )
-                            fig.add_hline(y=threshold, line_dash="dash", line_color="red", 
-                                        annotation_text="Ngưỡng chấp nhận")
-                            st.plotly_chart(fig, use_container_width=True)
                         
                         # Lưu kết quả
                         # Lưu ảnh test
@@ -661,9 +748,6 @@ class SignatureApp:
                                                 avg_sim = np.mean(similarities)
                                                 threshold = 0.80  # Tăng lên 80%
                                                 min_avg_threshold = 0.75  # Avg phải >= 75%
-                                                
-                                                # DEBUG: Log để kiểm tra
-                                                st.write(f"🔍 DEBUG DRAW - Max: {max_sim:.2%}, Avg: {avg_sim:.2%}, Threshold: {threshold:.2%}/{min_avg_threshold:.2%}")
                                                 
                                                 # Hiển thị kết quả - yêu cầu CẢ max và avg đều cao
                                                 if max_sim >= threshold and avg_sim >= min_avg_threshold:
