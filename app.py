@@ -310,41 +310,6 @@ class SignatureApp:
         if templates:
             st.markdown("### 📋 Chữ Ký Mẫu Đã Đăng Ký")
             
-            # Phân tích chất lượng mẫu nếu có nhiều hơn 1 mẫu
-            if len(templates) > 1:
-                st.markdown("#### 🔍 Phân Tích Chất Lượng Mẫu")
-                
-                # Tính toán độ tương đồng giữa các mẫu
-                template_similarities = []
-                for i, template1 in enumerate(templates):
-                    for j, template2 in enumerate(templates[i+1:], i+1):
-                        try:
-                            # Lấy features của cả 2 mẫu
-                            features1 = template1['features']
-                            features2 = template2['features']
-                            
-                            if features1 is not None and features2 is not None:
-                                similarity = self.processor.calculate_similarity(features1, features2)
-                                template_similarities.append({
-                                    'pair': f"Mẫu #{template1['id']} - #{template2['id']}",
-                                    'similarity': similarity,
-                                    'template1_id': template1['id'],
-                                    'template2_id': template2['id']
-                                })
-                        except Exception as e:
-                            st.warning(f"⚠️ Không thể so sánh mẫu #{template1['id']} và #{template2['id']}: {str(e)}")
-                
-                if template_similarities:
-                    avg_inter_similarity = np.mean([s['similarity'] for s in template_similarities])
-                    st.info(f"📊 Độ tương đồng trung bình giữa các mẫu: {avg_inter_similarity:.2%}")
-                    
-                    if avg_inter_similarity < 0.6:
-                        st.warning("⚠️ Các mẫu có độ tương đồng thấp - có thể cần kiểm tra lại chất lượng")
-                    elif avg_inter_similarity > 0.9:
-                        st.success("✅ Các mẫu có độ nhất quán cao")
-                    else:
-                        st.info("ℹ️ Các mẫu có độ nhất quán trung bình")
-            
             cols = st.columns(min(len(templates), 3))
             for i, template in enumerate(templates):
                 with cols[i % 3]:
