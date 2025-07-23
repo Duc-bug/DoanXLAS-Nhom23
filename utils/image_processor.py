@@ -164,74 +164,76 @@ class SignatureProcessor:
                 print(f"⚠️ Lỗi gradient features: {e}")
                 mag_hist = np.zeros(32, dtype=np.float32)
                 angle_hist = np.zeros(32, dtype=np.float32)
-        
-        # 3. STATISTICAL FEATURES (5 features)
-        try:
-            mean_val = float(np.mean(image))
-            std_val = float(np.std(image))
-            min_val = float(np.min(image))
-            max_val = float(np.max(image))
             
-            # Tỷ lệ pixel sáng (threshold = 0.5 cho normalized image)
-            if np.max(image) <= 1.0:
-                bright_ratio = float(np.sum(image > 0.5) / image.size)
-            else:
-                bright_ratio = float(np.sum(image > 127) / image.size)
+            # 3. STATISTICAL FEATURES (5 features)
+            try:
+                mean_val = float(np.mean(image))
+                std_val = float(np.std(image))
+                min_val = float(np.min(image))
+                max_val = float(np.max(image))
+                
+                # Tỷ lệ pixel sáng (threshold = 0.5 cho normalized image)
+                if np.max(image) <= 1.0:
+                    bright_ratio = float(np.sum(image > 0.5) / image.size)
+                else:
+                    bright_ratio = float(np.sum(image > 127) / image.size)
+                
+                stats = np.array([mean_val, std_val, min_val, max_val, bright_ratio], dtype=np.float32)
+                print(f"✅ Statistical features: {stats}")
+                
+            except Exception as e:
+                print(f"⚠️ Lỗi statistical features: {e}")
+                stats = np.zeros(5, dtype=np.float32)
             
-            stats = np.array([mean_val, std_val, min_val, max_val, bright_ratio], dtype=np.float32)
-            print(f"✅ Statistical features: {stats}")
+            # 4. KẾT HỢP TẤT CẢ FEATURES
+            try:
+                features = np.concatenate([
+                    raw_pixels,    # 16,384 features (128x128)
+                    mag_hist,      # 32 features  
+                    angle_hist,    # 32 features
+                    stats         # 5 features
+                ])
+                print(f"✅ Kết hợp features: {len(features)} total")
+                # Total: 16,384 + 32 + 32 + 5 = 16,453 features
+                
+            except Exception as e:
+                print(f"❌ Lỗi kết hợp features: {e}")
+                expected_size = self.target_size[0] * self.target_size[1] + 32 + 32 + 5
+                return np.zeros(expected_size, dtype=np.float32)
             
-        except Exception as e:
-            print(f"⚠️ Lỗi statistical features: {e}")
-            stats = np.zeros(5, dtype=np.float32)
-        
-        # 4. KẾT HỢP TẤT CẢ FEATURES
-        try:
-            features = np.concatenate([
-                raw_pixels,    # 16,384 features (128x128)
-                mag_hist,      # 32 features  
-                angle_hist,    # 32 features
-                stats         # 5 features
-            ])
-            print(f"✅ Kết hợp features: {len(features)} total")
-            # Total: 16,384 + 32 + 32 + 5 = 16,453 features
-            
-        except Exception as e:
-            print(f"❌ Lỗi kết hợp features: {e}")
+            # Validate output size
             expected_size = self.target_size[0] * self.target_size[1] + 32 + 32 + 5
-            return np.zeros(expected_size, dtype=np.float32)
-        
-        # Validate output size
-        expected_size = self.target_size[0] * self.target_size[1] + 32 + 32 + 5
-        if len(features) != expected_size:
-            print(f"⚠️ Kích thước features không đúng: {len(features)}, mong đợi: {expected_size}")
-            # Resize nếu cần
-            if len(features) < expected_size:
-                features = np.pad(features, (0, expected_size - len(features)), 'constant')
-            else:
-                features = features[:expected_size]
-        
-        # Validate output
-        if np.any(np.isnan(features)) or np.any(np.isinf(features)):
-            print("⚠️ Features chứa NaN hoặc Inf, đang sửa...")
-            features = np.nan_to_num(features, nan=0.0, posinf=1.0, neginf=0.0)
-        
-        print(f"✅ Trích xuất thành công {len(features)} features")
-        return features.astype(np.float32)
-        
-    except Exception as e:
-        print(f"❌ Lỗi trích xuất đặc trưng: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        # Trả về vector zero với kích thước chính xác
-        fallback_size = self.target_size[0] * self.target_size[1] + 32 + 32 + 5  # 16,453
-        return np.zeros(fallback_size, dtype=np.float32)
+            if len(features) != expected_size:
+                print(f"⚠️ Kích thước features không đúng: {len(features)}, mong đợi: {expected_size}")
+                # Resize nếu cần
+                if len(features) < expected_size:
+                    features = np.pad(features, (0, expected_size - len(features)), 'constant')
+                else:
+                    features = features[:expected_size]
+            
+            # Validate output
+            if np.any(np.isnan(features)) or np.any(np.isinf(features)):
+                print("⚠️ Features chứa NaN hoặc Inf, đang sửa...")
+                features = np.nan_to_num(features, nan=0.0, posinf=1.0, neginf=0.0)
+            
+            print(f"✅ Trích xuất thành công {len(features)} features")
+            return features.astype(np.float32)
+            
+        except Exception as e:
+            print(f"❌ Lỗi trích xuất đặc trưng: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            # Trả về vector zero với kích thước chính xác
+            fallback_size = self.target_size[0] * self.target_size[1] + 32 + 32 + 5  # 16,453
+            return np.zeros(fallback_size, dtype=np.float32)
     
     def calculate_similarity(self, features1, features2):
         """
         So sánh độ tương đồng - IMPROVED VERSION
         """
         try:
+            print(f"🔍 Bắt đầu tính similarity...")
+            
             # Validate inputs
             if features1 is None or features2 is None:
                 print("❌ Features là None")
@@ -239,6 +241,8 @@ class SignatureProcessor:
             
             f1 = np.array(features1, dtype=np.float32).flatten()
             f2 = np.array(features2, dtype=np.float32).flatten()
+            
+            print(f"    Features shape: f1={len(f1)}, f2={len(f2)}")
             
             if len(f1) == 0 or len(f2) == 0:
                 print("❌ Features rỗng")
@@ -252,46 +256,78 @@ class SignatureProcessor:
             f1 = np.nan_to_num(f1, nan=0.0, posinf=1.0, neginf=0.0)
             f2 = np.nan_to_num(f2, nan=0.0, posinf=1.0, neginf=0.0)
             
+            print(f"    f1 range: [{np.min(f1):.3f}, {np.max(f1):.3f}]")
+            print(f"    f2 range: [{np.min(f2):.3f}, {np.max(f2):.3f}]")
+            
             # Method 1: Cosine Similarity
             dot_product = np.dot(f1, f2)
             norm1 = np.linalg.norm(f1)
             norm2 = np.linalg.norm(f2)
             
+            print(f"    Dot product: {dot_product:.3f}, Norm1: {norm1:.3f}, Norm2: {norm2:.3f}")
+            
             if norm1 == 0 or norm2 == 0:
                 cosine_sim = 0.0
+                print("    ⚠️ Một trong các norm = 0")
             else:
                 cosine_sim = dot_product / (norm1 * norm2)
                 cosine_sim = max(0, min(1, cosine_sim))
             
             # Method 2: Euclidean Similarity với standardization
             try:
-                # Combine và standardize
-                combined = np.vstack([f1.reshape(1, -1), f2.reshape(1, -1)])
-                scaler = StandardScaler()
-                scaled = scaler.fit_transform(combined)
+                # Kiểm tra variance trước khi standardize
+                if np.var(f1) == 0 and np.var(f2) == 0:
+                    # Cả hai đều constant
+                    if np.allclose(f1, f2):
+                        euclidean_sim = 1.0
+                    else:
+                        euclidean_sim = 0.0
+                elif np.var(f1) == 0 or np.var(f2) == 0:
+                    # Một trong hai constant
+                    euclidean_sim = cosine_sim
+                else:
+                    # Combine và standardize
+                    combined = np.vstack([f1.reshape(1, -1), f2.reshape(1, -1)])
+                    scaler = StandardScaler()
+                    scaled = scaler.fit_transform(combined)
+                    
+                    f1_scaled = scaled[0]
+                    f2_scaled = scaled[1]
+                    
+                    # Euclidean distance
+                    distance = np.linalg.norm(f1_scaled - f2_scaled)
+                    max_distance = np.sqrt(len(f1_scaled))
+                    
+                    euclidean_sim = 1 - (distance / max_distance)
+                    euclidean_sim = max(0, min(1, euclidean_sim))
                 
-                f1_scaled = scaled[0]
-                f2_scaled = scaled[1]
+                print(f"    Euclidean calculation successful")
                 
-                # Euclidean distance
-                distance = np.linalg.norm(f1_scaled - f2_scaled)
-                max_distance = np.sqrt(len(f1_scaled))
-                
-                euclidean_sim = 1 - (distance / max_distance)
-                euclidean_sim = max(0, min(1, euclidean_sim))
-                
-            except Exception:
+            except Exception as e:
+                print(f"    ⚠️ Lỗi Euclidean: {e}")
                 euclidean_sim = cosine_sim
             
-            # Weighted combination
-            final_similarity = 0.6 * cosine_sim + 0.4 * euclidean_sim
+            # Method 3: Correlation
+            try:
+                correlation = np.corrcoef(f1, f2)[0, 1]
+                if np.isnan(correlation):
+                    correlation = 0.0
+                correlation = max(0, min(1, abs(correlation)))  # Lấy absolute
+            except:
+                correlation = cosine_sim
             
-            print(f"🔍 Cosine: {cosine_sim:.4f}, Euclidean: {euclidean_sim:.4f}, Final: {final_similarity:.4f}")
+            # Weighted combination - cải thiện trọng số
+            final_similarity = 0.4 * cosine_sim + 0.3 * euclidean_sim + 0.3 * correlation
+            
+            print(f"🔍 Cosine: {cosine_sim:.4f}, Euclidean: {euclidean_sim:.4f}, Correlation: {correlation:.4f}")
+            print(f"🔍 Final: {final_similarity:.4f}")
             
             return float(final_similarity)
             
         except Exception as e:
             print(f"❌ Lỗi tính similarity: {str(e)}")
+            import traceback
+            traceback.print_exc()
             return 0.0
     
     def compare_signatures(self, image1, image2):
@@ -348,7 +384,38 @@ class SignatureProcessor:
         except Exception as e:
             print(f"Lỗi hiển thị ảnh: {str(e)}")
 
-
+def test_processor():
+    """
+    Test function để debug
+    """
+    print("🧪 Bắt đầu test SignatureProcessor...")
+    
+    processor = SignatureProcessor()
+    
+    # Tạo ảnh test đơn giản
+    test_image = np.random.rand(128, 128).astype(np.float32)
+    print(f"Test image shape: {test_image.shape}")
+    
+    # Test preprocess
+    processed = processor.preprocess_image(test_image)
+    print(f"Processed shape: {processed.shape}")
+    
+    # Test extract features
+    features = processor.extract_features(processed)
+    print(f"Features shape: {len(features)}")
+    
+    # Test similarity với chính nó (phải gần = 1.0)
+    similarity = processor.calculate_similarity(features, features)
+    print(f"Self similarity: {similarity}")
+    
+    # Test với ảnh khác
+    test_image2 = np.random.rand(128, 128).astype(np.float32)
+    processed2 = processor.preprocess_image(test_image2)
+    features2 = processor.extract_features(processed2)
+    similarity2 = processor.calculate_similarity(features, features2)
+    print(f"Different image similarity: {similarity2}")
+    
+    print("✅ Test hoàn thành!")
 
 if __name__ == "__main__":
     test_processor()

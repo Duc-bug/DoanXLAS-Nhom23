@@ -364,16 +364,70 @@ class SignatureApp:
                     # So sánh với tất cả templates
                     similarities = []
                     
-                    for template in templates:
-                        if template['features'] is not None:
-                            similarity = self.processor.calculate_similarity(
-                                test_features, 
-                                template['features']
-                            )
-                            similarities.append({
-                                'template_id': template['id'],
-                                'similarity': similarity
-                            })
+                    with st.spinner("🔄 Đang xử lý và so sánh..."):
+                        for template in templates:
+                            try:
+                                # Kiểm tra và xử lý features
+                                if template['features'] is not None:
+                                    # Nếu features là bytes, decode nó
+                                    if isinstance(template['features'], bytes):
+                                        import pickle
+                                        template_features = pickle.loads(template['features'])
+                                    else:
+                                        template_features = template['features']
+                                    
+                                    # Nếu không có features, trích xuất lại từ ảnh
+                                    if template_features is None or len(template_features) == 0:
+                                        if os.path.exists(template['image_path']):
+                                            template_img = cv2.imread(template['image_path'], cv2.IMREAD_GRAYSCALE)
+                                            if template_img is not None:
+                                                processed_template = self.processor.preprocess_image(template_img)
+                                                template_features = self.processor.extract_features(processed_template)
+                                            else:
+                                                continue
+                                        else:
+                                            continue
+                                    
+                                    # Tính similarity
+                                    similarity = self.processor.calculate_similarity(
+                                        test_features, 
+                                        template_features
+                                    )
+                                    
+                                    similarities.append({
+                                        'template_id': template['id'],
+                                        'similarity': similarity
+                                    })
+                                    
+                                    st.write(f"✅ So sánh với mẫu #{template['id']}: {similarity:.2%}")
+                                    
+                                else:
+                                    # Không có features, trích xuất từ ảnh
+                                    if os.path.exists(template['image_path']):
+                                        template_img = cv2.imread(template['image_path'], cv2.IMREAD_GRAYSCALE)
+                                        if template_img is not None:
+                                            processed_template = self.processor.preprocess_image(template_img)
+                                            template_features = self.processor.extract_features(processed_template)
+                                            
+                                            similarity = self.processor.calculate_similarity(
+                                                test_features, 
+                                                template_features
+                                            )
+                                            
+                                            similarities.append({
+                                                'template_id': template['id'],
+                                                'similarity': similarity
+                                            })
+                                            
+                                            st.write(f"✅ So sánh với mẫu #{template['id']}: {similarity:.2%}")
+                                        else:
+                                            st.warning(f"⚠️ Không thể đọc ảnh mẫu #{template['id']}")
+                                    else:
+                                        st.warning(f"⚠️ Không tìm thấy ảnh mẫu #{template['id']}")
+                                        
+                            except Exception as e:
+                                st.error(f"❌ Lỗi xử lý mẫu #{template['id']}: {str(e)}")
+                                continue
                     
                     if similarities:
                         # Tìm độ tương đồng cao nhất
