@@ -759,13 +759,7 @@ class SignatureApp:
         tab1, tab2, tab3 = st.tabs(["🎛️ Tham Số", "🗄️ Dữ Liệu", "ℹ️ Thông Tin"])
         
         with tab1:
-            st.markdown("### 🎯 Cài Đặt Ngưỡng")
-            
-            threshold = st.slider(
-                "Ngưỡng chấp nhận chữ ký (%)",
-                min_value=70, max_value=95, value=80,
-                help="Độ tương đồng tối thiểu để chữ ký được coi là hợp lệ"
-            )
+        
             
             st.markdown("### 🖼️ Cài Đặt Xử Lý Ảnh")
             
