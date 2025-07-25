@@ -675,34 +675,70 @@ class SignatureApp:
             st.info("🎨 Hãy vẽ chữ ký của bạn trên canvas ở trên")
             
     def settings_page(self):
-        st.markdown('<h2 class="section-header">⚙️ Cài Đặt Hệ Thống</h2>', unsafe_allow_html=True)
+    st.markdown('<h2 class="section-header">⚙️ Cài Đặt Hệ Thống</h2>', unsafe_allow_html=True)
+    
+    st.markdown("### ℹ️ Thông Tin Ứng Dụng")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        **🏷️ Phiên bản:** 1.0.0  
+        **👨‍💻 Phát triển bởi:** Nhóm 23  
+        **📅 Ngày tạo:** 2025  
+        **🐍 Python:** 3.12+  
+        **🌐 Framework:** Streamlit  
         
-        tab1 = st.tabs([ "ℹ️ Thông Tin"])
+        **📚 Thư viện chính:**
+        - OpenCV: Xử lý ảnh
+        - scikit-learn: Machine Learning  
+        - SQLite: Cơ sở dữ liệu
+        - Streamlit: Giao diện web
+        - NumPy/Pandas: Xử lý dữ liệu
+        """)
+    
+    with col2:
+        st.markdown("""
+        **🔗 Liên hệ hỗ trợ:**  
+        📧 Email: duc.2373401010100@vanlanguni.vn  
+        🐙 GitHub: [Ai_nhan_dang_chu_ki](https://github.com/Duc-bug/Ai_nhan_dang_chu_ki)
         
-        with tab1:
-            st.markdown("### ℹ️ Thông Tin Ứng Dụng")
-            
-            st.markdown("""
-            **🏷️ Phiên bản:** 1.0.0  
-            **👨‍💻 Phát triển bởi:** Nhóm 23  
-            **📅 Ngày tạo:** 2025 
-            **🐍 Python:** 3.12+  
-            **🌐 Framework:** Streamlit  
-            
-            **📚 Thư viện chính:**
-            - TensorFlow/Keras/scikit-learn: Deep Learning
-            - OpenCV/Pillow: Xử lý ảnh
-            - SQLite/json : Cơ sở dữ liệu
-            - Streamlit: Giao diện web
-            - NumPy/Pandas/matplotlib/plotly/seaborn: Xử lý dữ liệu
-            
-            **🔗 Liên hệ hỗ trợ:**  
-            Email: duc.2373401010100@vanlanguni.vn 
-            GitHub: https://github.com/Duc-bug/Ai_nhan_dang_chu_ki
-            """)
-            
-            if st.button("🔄 Kiểm Tra Cập Nhật"):
-                st.info("✅ Bạn đang sử dụng phiên bản mới nhất!")
+        **📈 Thống kê hệ thống:**
+        """)
+        
+        # Hiển thị thống kê
+        stats = self.db.get_stats()
+        st.metric("👤 Tổng người dùng", stats['users_count'])
+        st.metric("📝 Tổng chữ ký mẫu", stats['templates_count'])
+        st.metric("🔍 Tổng lần xác minh", stats['verifications_count'])
+        
+        # Hiển thị kích thước database
+        if os.path.exists("data/database.db"):
+            db_size = os.path.getsize("data/database.db") / 1024  # KB
+            st.metric("💾 Kích thước DB", f"{db_size:.1f} KB")
+    
+    st.markdown("---")
+    
+    col1 = st.columns(1)
+    with col1:
+        if st.button("🔄 Kiểm Tra Cập Nhật", use_container_width=True):
+            st.info("✅ Bạn đang sử dụng phiên bản mới nhất!")
+
+    
+    # Thông tin kỹ thuật
+    with st.expander("🔧 Thông Tin Kỹ Thuật"):
+        st.markdown("""
+        **Thuật toán sử dụng:**
+        - Preprocessing: Gaussian Blur + Adaptive Threshold
+        - Feature extraction: Contour analysis + Shape descriptors
+        - Similarity: Cosine similarity + Euclidean distance
+        - Decision: Multi-threshold adaptive algorithm
+        
+        **Cấu trúc dữ liệu:**
+        - Database: SQLite với 3 bảng chính
+        - Features: Vector số thực 1D
+        - Images: Lưu trữ đường dẫn file
+        """)
 
 def main():
     app = SignatureApp()

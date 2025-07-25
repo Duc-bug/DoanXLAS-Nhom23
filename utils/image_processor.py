@@ -7,7 +7,6 @@ class SignatureProcessor:
     def __init__(self, target_size=(128, 128)):
         self.target_size = target_size
         self.scaler = StandardScaler()
-    
     def preprocess_image(self, image_input):
         """
         Xử lý ảnh chữ ký: chuyển sang grayscale, resize, normalize
@@ -55,8 +54,7 @@ class SignatureProcessor:
             binary = cv2.adaptiveThreshold(
                 gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
                 cv2.THRESH_BINARY_INV, 11, 2
-            )
-            
+            )  
             # Tìm contours để crop ảnh
             contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             
@@ -85,24 +83,18 @@ class SignatureProcessor:
             # Đảm bảo cropped có kích thước hợp lý
             if cropped.shape[0] < 10 or cropped.shape[1] < 10:
                 cropped = gray
-            
             # Resize về kích thước chuẩn
             resized = cv2.resize(cropped, self.target_size, interpolation=cv2.INTER_AREA)
-            
             # Normalize về [0, 1]
             normalized = resized.astype(np.float32) / 255.0
-            
             return normalized
-            
         except Exception as e:
             print(f"Lỗi xử lý ảnh: {str(e)}")
             # Trả về ảnh đen như fallback
             return np.zeros(self.target_size, dtype=np.float32)
     
     def extract_features(self, image):
-        """
-        Trích xuất đặc trưng từ ảnh chữ ký - FIXED VERSION
-        """
+        
         try:
             # Validate input
             if image is None:
@@ -238,7 +230,6 @@ class SignatureProcessor:
             else:
                 cosine_sim = dot_product / (norm1 * norm2)
                 cosine_sim = max(0, min(1, cosine_sim))
-            
             # Method 2: Euclidean Similarity với standardization
             try:
                 # Kiểm tra variance trước khi standardize
@@ -279,15 +270,12 @@ class SignatureProcessor:
                 correlation = max(0, min(1, abs(correlation)))  # Lấy absolute
             except:
                 correlation = cosine_sim
-            
             # Weighted combination - cải thiện trọng số
             final_similarity = 0.4 * cosine_sim + 0.3 * euclidean_sim + 0.3 * correlation
             
-            return float(final_similarity)
-            
+            return float(final_similarity)   
         except Exception:
             return 0.0
-    
     def compare_signatures(self, image1, image2):
         """
         So sánh 2 ảnh chữ ký hoàn chỉnh
@@ -296,22 +284,18 @@ class SignatureProcessor:
             # Preprocess
             processed1 = self.preprocess_image(image1)
             processed2 = self.preprocess_image(image2)
-            
             # Extract features
             features1 = self.extract_features(processed1)
             features2 = self.extract_features(processed2)
-            
             # Calculate similarity
             similarity = self.calculate_similarity(features1, features2)
-            
             return {
                 'similarity': similarity,
                 'processed_image1': processed1,
                 'processed_image2': processed2,
                 'features1': features1,
                 'features2': features2
-            }
-            
+            } 
         except Exception:
             return {
                 'similarity': 0.0,
@@ -320,7 +304,6 @@ class SignatureProcessor:
                 'features1': np.zeros(16453, dtype=np.float32),
                 'features2': np.zeros(16453, dtype=np.float32)
             }
-    
     def visualize_signature(self, image, title="Chữ ký"):
         """
         Hiển thị ảnh chữ ký
