@@ -177,15 +177,14 @@ class SignatureApp:
         st.markdown("### 📈 Tổng Quan Hệ Thống")
         stats = self.db.get_stats()
         
-        col1, col2, col3, col4 = st.columns(4)
+        col1, col2, col3,  = st.columns(4)
         with col1:
             st.metric("Người Dùng", stats['users_count'])
         with col2:
             st.metric("Chữ Ký Mẫu", stats['templates_count'])
         with col3:
             st.metric("Lần Xác Minh", stats['verifications_count'])
-        with col4:
-            st.metric("Tỷ Lệ Chữ Ký Thật", f"{stats['genuine_rate']:.1f}%")
+       
     
     def user_management(self):
         st.markdown('<h2 class="section-header">👤 Quản Lý Người Dùng</h2>', unsafe_allow_html=True)
@@ -501,7 +500,6 @@ class SignatureApp:
                                 <h3>✅ CHỮ KÝ HỢP LỆ</h3>
                                 <p><strong>🎯 Độ tương đồng cao nhất:</strong> {best_match['similarity']:.2%} (Mẫu #{best_match['template_id']})</p>
                                 <p><strong>📊 Độ tương đồng trung bình:</strong> {avg_similarity:.2%}</p>
-                                <p><strong>📈 Độ tương đồng trung vị:</strong> {median_similarity:.2%}</p>
                                 <p><strong>� Số mẫu so sánh:</strong> {len(similarities)}</p>
                                 <p><strong>⚙️ Điều kiện áp dụng:</strong> {decision_info}</p>
                             </div>
@@ -512,8 +510,7 @@ class SignatureApp:
                                 reasons.append(f"Điểm cao nhất ({best_match['similarity']:.2%}) < ngưỡng ({threshold:.2%})")
                             if len(similarities) >= 2 and avg_similarity < settings.get('dual_avg_threshold', 0.40):
                                 reasons.append(f"Điểm trung bình thấp ({avg_similarity:.2%})")
-                            if len(similarities) >= 3 and median_similarity < settings.get('multi_median_threshold', 0.35):
-                                reasons.append(f"Điểm trung vị thấp ({median_similarity:.2%})")
+                            
                             
                             reason_text = ", ".join(reasons) if reasons else "Không đạt ngưỡng chấp nhận"
                             
