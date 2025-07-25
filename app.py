@@ -522,7 +522,6 @@ class SignatureApp:
                                 <h3>❌ CHỮ KÝ KHÔNG HỢP LỆ</h3>
                                 <p><strong>🎯 Độ tương đồng cao nhất:</strong> {best_match['similarity']:.2%} (Mẫu #{best_match['template_id']})</p>
                                 <p><strong>📊 Độ tương đồng trung bình:</strong> {avg_similarity:.2%}</p>
-                                <p><strong>📈 Độ tương đồng trung vị:</strong> {median_similarity:.2%}</p>
                                 <p><strong>� Số mẫu so sánh:</strong> {len(similarities)}</p>
                                 <p><strong>⚙️ Điều kiện áp dụng:</strong> {decision_info}</p>
                                 <p><strong>⚠️ Lý do từ chối:</strong> {reason_text}</p>
