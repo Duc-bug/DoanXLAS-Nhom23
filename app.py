@@ -703,14 +703,10 @@ class SignatureApp:
             📧 Email: duc.2373401010100@vanlanguni.vn  
             🐙 GitHub: [Ai_nhan_dang_chu_ki](https://github.com/Duc-bug/Ai_nhan_dang_chu_ki)
             
-            **📈 Thống kê hệ thống:**
+            
             """)
         
-            # Hiển thị thống kê
-            stats = self.db.get_stats()
-            st.metric("👤 Tổng người dùng", stats['users_count'])
-            st.metric("📝 Tổng chữ ký mẫu", stats['templates_count'])
-            st.metric("🔍 Tổng lần xác minh", stats['verifications_count'])
+            
             
             # Hiển thị kích thước database
             if os.path.exists("data/database.db"):
