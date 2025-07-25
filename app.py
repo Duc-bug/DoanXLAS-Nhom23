@@ -756,9 +756,9 @@ class SignatureApp:
     def settings_page(self):
         st.markdown('<h2 class="section-header">⚙️ Cài Đặt Hệ Thống</h2>', unsafe_allow_html=True)
         
-        tab2, tab3 = st.tabs(["🎛️ Tham Số", "🗄️ Dữ Liệu", "ℹ️ Thông Tin"])
+        tab1, tab2 = st.tabs(["🗄️ Dữ Liệu", "ℹ️ Thông Tin"])
         
-        with tab2:
+        with tab1:
             st.markdown("### 🗂️ Quản Lý Dữ Liệu")
             
             st.warning("⚠️ **Cảnh báo:** Các thao tác sau không thể hoàn tác!")
@@ -793,7 +793,7 @@ class SignatureApp:
             
             st.info(f"💾 Dung lượng dữ liệu: **{data_size / (1024*1024):.1f} MB**")
         
-        with tab3:
+        with tab2:
             st.markdown("### ℹ️ Thông Tin Ứng Dụng")
             
             st.markdown("""
