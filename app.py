@@ -756,25 +756,7 @@ class SignatureApp:
     def settings_page(self):
         st.markdown('<h2 class="section-header">⚙️ Cài Đặt Hệ Thống</h2>', unsafe_allow_html=True)
         
-        tab1, tab2, tab3 = st.tabs(["🎛️ Tham Số", "🗄️ Dữ Liệu", "ℹ️ Thông Tin"])
-        
-        with tab1:
-        
-            
-            st.markdown("### 🖼️ Cài Đặt Xử Lý Ảnh")
-            
-            col1, col2 = st.columns(2)
-            with col1:
-                target_width = st.number_input("Chiều rộng ảnh (px)", 64, 512, 128)
-                target_height = st.number_input("Chiều cao ảnh (px)", 64, 512, 128)
-            
-            with col2:
-                padding = st.number_input("Padding (px)", 0, 50, 10)
-                blur_kernel = st.selectbox("Kernel làm mờ", [1, 3, 5, 7], index=1)
-            
-            if st.button("💾 Lưu Cài Đặt"):
-                # Ở đây có thể lưu cài đặt vào file config
-                st.success("✅ Đã lưu cài đặt!")
+        tab2, tab3 = st.tabs(["🎛️ Tham Số", "🗄️ Dữ Liệu", "ℹ️ Thông Tin"])
         
         with tab2:
             st.markdown("### 🗂️ Quản Lý Dữ Liệu")
@@ -805,7 +787,7 @@ class SignatureApp:
             # Tính toán dung lượng
             data_size = 0
             if os.path.exists("data"):
-                for root, dirs, files in os.walk("data"):
+                for root, _, files in os.walk("data"):
                     for file in files:
                         data_size += os.path.getsize(os.path.join(root, file))
             
