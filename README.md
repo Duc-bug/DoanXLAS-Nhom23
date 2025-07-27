@@ -38,11 +38,11 @@ streamlit run app.py
 
 ## Cấu trúc dự án
 -app_nhan_dien_chu_ky/             
-    ├── data/               # Database và ảnh
-    ├── utils/              # Tiện ích xử lý
-    ├── app.py              # Ứng dụng chính
-    ├── requirements.txt    # Dependencies
-    └── README.md          # Tài liệu
+├── data/               # Database và ảnh
+├── utils/              # Tiện ích xử lý
+├── app.py              # Ứng dụng chính
+├── requirements.txt    # Dependencies
+└── README.md          # Tài liệu
 
 ## 🛠️ Công nghệ
 
