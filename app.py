@@ -676,11 +676,11 @@ class SignatureApp:
             
     def settings_page(self):
         st.markdown('<h2 class="section-header">⚙️ Cài Đặt Hệ Thống</h2>', unsafe_allow_html=True)
-    
+
         st.markdown("### ℹ️ Thông Tin Ứng Dụng")
-    
+
         col1, col2 = st.columns(2)
-    
+
         with col1:
             st.markdown("""
             **🏷️ Phiên bản:** 1.0.0  
@@ -695,19 +695,26 @@ class SignatureApp:
             - SQLite: Cơ sở dữ liệu
             - Streamlit: Giao diện web
             - NumPy/Pandas: Xử lý dữ liệu
+            
+            **🔧 Thuật toán sử dụng:**
+            - Preprocessing: Gaussian Blur + Adaptive Threshold
+            - Feature extraction: Contour analysis + Shape descriptors
+            - Similarity: Cosine similarity + Euclidean distance
+            - Decision: Multi-threshold adaptive algorithm
             """)
-    
+
         with col2:
             st.markdown("""
             **🔗 Liên hệ hỗ trợ:**  
             📧 Email: duc.2373401010100@vanlanguni.vn  
-            🐙 GitHub: [Ai_nhan_dang_chu_ki](https://github.com/Duc-bug/Ai_nhan_dang_chu_ki)
+            🐙 GitHub:[app_nhan_dien_chu_ki](https://github.com/Duc-bug/DoanXLAS-Nhom23)
             
-            
+            **💾 Cấu trúc dữ liệu:**
+            - Database: SQLite với 3 bảng chính
+            - Features: Vector số thực 1D
+            - Images: Lưu trữ đường dẫn file
             """)
-        
-            
-            
+
             # Hiển thị kích thước database
             if os.path.exists("data/database.db"):
                 db_size = os.path.getsize("data/database.db") / 1024  # KB
@@ -715,20 +722,7 @@ class SignatureApp:
     
     st.markdown("---")
     
-    # Thông tin kỹ thuật
-    with st.expander("🔧 Thông Tin Kỹ Thuật"):
-        st.markdown("""
-        **Thuật toán sử dụng:**
-        - Preprocessing: Gaussian Blur + Adaptive Threshold
-        - Feature extraction: Contour analysis + Shape descriptors
-        - Similarity: Cosine similarity + Euclidean distance
-        - Decision: Multi-threshold adaptive algorithm
-        
-        **Cấu trúc dữ liệu:**
-        - Database: SQLite với 3 bảng chính
-        - Features: Vector số thực 1D
-        - Images: Lưu trữ đường dẫn file
-        """)
+   
 
 def main():
     app = SignatureApp()
