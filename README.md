@@ -47,19 +47,6 @@
 - **SQLite** - Lưu trữ dữ liệu
 - **Python** - Ngôn ngữ lập trình
 
-## 📷 Lời khuyên chụp ảnh
-
-### ✅ Nên:
-- Chụp rõ nét, đủ sáng
-- Nền trắng, chữ ký màu đen
-- Chụp thẳng, không nghiêng
-- Chữ ký to, rõ ràng
-
-### ❌ Không nên:
-- Ảnh mờ, tối
-- Nền màu, nhiều nhiễu
-- Chụp góc xiên
-- Chữ ký nhỏ, mờ nhạt
 
 ## 📁 Files trong dự án
 
