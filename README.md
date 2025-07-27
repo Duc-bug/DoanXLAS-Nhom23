@@ -1,71 +1,59 @@
 # 🖋️ Ứng Dụng Nhận Diện Chữ Ký
 
-Ứng dụng  nhận diện và xác minh chữ ký sử dụng Siamese Network và Streamlit.
+Ứng dụng web đơn giản để kiểm tra chữ ký có giống với chữ ký mẫu hay không.
 
-## 🚀 Tính năng
+## ✨ Chức năng
 
--  Đăng ký và quản lý chữ ký mẫu
--  Vẽ chữ ký trực tiếp trên web
+- 📝 Lưu chữ ký mẫu
+- 🔍 Kiểm tra chữ ký mới  
+- 🎨 Vẽ chữ ký trên web
+- 👤 Quản lý người dùng
 
+## 🚀 Cách chạy
 
+### Cách 1: Dễ nhất (Windows)
+1. Tải Python từ: https://python.org
+2. Chạy file `setup.bat`
+3. Chạy file `run_app.bat`
+4. Mở: http://localhost:8501
 
-## ⚡ Cài đặt và chạy
-
-### Cài đặt nhanh (Windows)
+### Cách 2: Thủ công
 ```bash
-setup.bat
-run_app.bat
-```
-
-### Cài đặt thủ công
-```bash
-# Clone repository
-git clone https://github.com/Duc-bug/Ai_nhan_dang_chu_ki
-cd app_nhan_dien_chu_ky
-
-# Tạo virtual environment
-python -m venv venv
-venv\Scripts\activate  # Windows
-# source venv/bin/activate  # Linux/Mac
-
-# Cài đặt dependencies
-pip install -r requirements.txt
-
-# Chạy ứng dụng
+pip install streamlit opencv-python scikit-learn pandas numpy pillow
 streamlit run app.py
 ```
 
-Ứng dụng sẽ mở tại: `http://localhost:8501`
+## 📖 Cách sử dụng
 
-## 🛠️ Yêu cầu
+1. **Tạo người dùng**: Vào mục "Quản Lý Người Dùng"
+2. **Thêm chữ ký mẫu**: Upload 2-3 ảnh chữ ký 
+3. **Kiểm tra**: Upload ảnh chữ ký cần kiểm tra
+4. **Xem kết quả**: Hợp lệ ✅ hoặc Không hợp lệ ❌
 
-- Python 3.12
-- RAM: 4GB+ 
-- CPU hỗ trợ AVX
+## 💡 Lưu ý
 
-## 📁 Cấu trúc
+- Ảnh nên có nền trắng, chữ đen
+- Chụp rõ nét, không bị mờ
+- Đây là đồ án học tập, chỉ để demo
 
-```
-app_nhan_dien_chu_ky/             
-├── data/               # Database và ảnh
-├── utils/              # Tiện ích xử lý
-├── app.py              # Ứng dụng chính
-├── requirements.txt    # Dependencies
-└── README.md          # Tài liệu
-```
+## Cấu trúc dự án
+-app_nhan_dien_chu_ky/             
+    ├── data/               # Database và ảnh
+    ├── utils/              # Tiện ích xử lý
+    ├── app.py              # Ứng dụng chính
+    ├── requirements.txt    # Dependencies
+    └── README.md          # Tài liệu
 
-## 📖 Hướng dẫn sử dụng
+## 🛠️ Công nghệ
 
-1. **Tạo người dùng**: Menu "👤 Quản Lý Người Dùng"
-2. **Đăng ký mẫu**: Upload 3-5 ảnh chữ ký mẫu
-3. **Xác minh**: Upload ảnh để kiểm tra độ tương tự
-4. **Vẽ chữ ký**: Vẽ trực tiếp trên canvas
+- Python + Streamlit
+- OpenCV (xử lý ảnh)
+- SQLite (lưu dữ liệu)
 
+##Liên hệ
 
+**Email**: duc.2373401010100@vanlanguni.vn  
+**GitHub**: [Nhóm 23](https://github.com/Duc-bug/DoanXLAS-Nhom23)
 
-
-
-
-## 📝 License
-
-MIT License - Xem file LICENSE để biết chi tiết.
+---
+**Nhóm 23 - Đồ án 2025** 
