@@ -76,8 +76,8 @@ streamlit run app.py
 
 - **Email:** duc.2373401010100@vanlanguni.vn
 - **GitHub:** [DoanXLAS-Nhom23](https://github.com/Duc-bug/DoanXLAS-Nhom23)
-- **Demo:** [Streamlit App](https://doanxlas-nhom23-app-nhan-dien-chu-ki.streamlit.app)
+
 
 ---
 
-**Nhóm 23 - Đại học Văn Lang 2025** 🎓
+**Nhóm 23**
