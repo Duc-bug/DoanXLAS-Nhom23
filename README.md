@@ -36,13 +36,16 @@ streamlit run app.py
 - Chụp rõ nét, không bị mờ
 - Đây là đồ án học tập, chỉ để demo
 
-## Cấu trúc dự án
--app_nhan_dien_chu_ky/             
+## 📁 Cấu trúc dự án
+
+```
+app_nhan_dien_chu_ky/             
 ├── data/               # Database và ảnh
 ├── utils/              # Tiện ích xử lý
 ├── app.py              # Ứng dụng chính
 ├── requirements.txt    # Dependencies
 └── README.md          # Tài liệu
+```
 
 ## 🛠️ Công nghệ
 
