@@ -1,62 +1,96 @@
 # 🖋️ Ứng Dụng Nhận Diện Chữ Ký
 
-Ứng dụng web đơn giản để kiểm tra chữ ký có giống với chữ ký mẫu hay không.
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://doanxlas-nhom23-app-nhan-dien-chu-ki.streamlit.app)
 
-## ✨ Chức năng
+Ứng dụng web đơn giản để so sánh và xác thực chữ ký bằng xử lý ảnh.
 
-- 📝 Lưu chữ ký mẫu
-- 🔍 Kiểm tra chữ ký mới  
-- 🎨 Vẽ chữ ký trên web
-- 👤 Quản lý người dùng
+## ✨ Tính năng
 
-## 🚀 Cách chạy
+- 📝 **Đăng ký chữ ký mẫu** - Upload và lưu chữ ký gốc
+- 🔍 **So sánh chữ ký** - Kiểm tra chữ ký có khớp với mẫu không
+- 👤 **Quản lý người dùng** - Nhiều người có thể sử dụng
+- 🎨 **Vẽ chữ ký trực tiếp** - Vẽ chữ ký trên web
+- 📊 **Xem kết quả** - Hiển thị độ giống nhau
 
-### Cách 1: Dễ nhất (Windows)
-1. Tải Python từ: https://python.org
-2. Chạy file `setup.bat`
-3. Chạy file `run_app.bat`
-4. Mở: http://localhost:8501
+## 🚀 Sử dụng ngay
 
-### Cách 2: Thủ công
-```bash
-pip install streamlit opencv-python scikit-learn pandas numpy pillow
-streamlit run app.py
-```
+**🌐 Truy cập:** [https://doanxlas-nhom23-app-nhan-dien-chu-ki.streamlit.app](https://doanxlas-nhom23-app-nhan-dien-chu-ki.streamlit.app)
+
+*Không cần cài đặt, chỉ cần trình duyệt!*
 
 ## 📖 Cách sử dụng
 
-1. **Tạo người dùng**: Vào mục "Quản Lý Người Dùng"
-2. **Thêm chữ ký mẫu**: Upload 2-3 ảnh chữ ký 
-3. **Kiểm tra**: Upload ảnh chữ ký cần kiểm tra
-4. **Xem kết quả**: Hợp lệ ✅ hoặc Không hợp lệ ❌
+### 1️⃣ Tạo người dùng
+- Vào **👤 Quản Lý Người Dùng**
+- Nhập tên và email
+- Chọn người dùng để làm việc
 
-## 💡 Lưu ý
+### 2️⃣ Đăng ký chữ ký mẫu
+- Vào **📝 Đăng Ký Chữ Ký**
+- Upload 2-3 ảnh chữ ký của bạn
+- Hệ thống sẽ lưu làm mẫu
 
-- Ảnh nên có nền trắng, chữ đen
-- Chụp rõ nét, không bị mờ
-- Đây là đồ án học tập, chỉ để demo
+### 3️⃣ Kiểm tra chữ ký
+- Vào **🔍 Xác Minh Chữ Ký**
+- Upload ảnh chữ ký cần kiểm tra
+- Xem kết quả: ✅ **Giống** hoặc ❌ **Khác**
 
-## 📁 Cấu trúc dự án
+### 4️⃣ Vẽ chữ ký
+- Vào **🎨 Vẽ Chữ Ký**
+- Dùng chuột vẽ chữ ký
+- Lưu hoặc kiểm tra ngay
+
+## 🔧 Công nghệ
+
+- **Streamlit** - Giao diện web
+- **OpenCV** - Xử lý ảnh
+- **SQLite** - Lưu trữ dữ liệu
+- **Python** - Ngôn ngữ lập trình
+
+## 📷 Lời khuyên chụp ảnh
+
+### ✅ Nên:
+- Chụp rõ nét, đủ sáng
+- Nền trắng, chữ ký màu đen
+- Chụp thẳng, không nghiêng
+- Chữ ký to, rõ ràng
+
+### ❌ Không nên:
+- Ảnh mờ, tối
+- Nền màu, nhiều nhiễu
+- Chụp góc xiên
+- Chữ ký nhỏ, mờ nhạt
+
+## 📁 Files trong dự án
 
 ```
-app_nhan_dien_chu_ky/             
-├── data/               # Database và ảnh
-├── utils/              # Tiện ích xử lý
 ├── app.py              # Ứng dụng chính
-├── requirements.txt    # Dependencies
-└── README.md          # Tài liệu
+├── requirements.txt    # Thư viện cần thiết
+├── README.md          # Hướng dẫn này
+├── data/              # Lưu dữ liệu
+└── utils/             # Code xử lý
 ```
 
-## 🛠️ Công nghệ
+## 💻 Chạy trên máy (tùy chọn)
 
-- Python + Streamlit
-- OpenCV (xử lý ảnh)
-- SQLite (lưu dữ liệu)
+```bash
+# Tải về
+git clone https://github.com/Duc-bug/DoanXLAS-Nhom23
+cd app_nhan_dien_chu_ky
 
-##Liên hệ
+# Cài đặt
+pip install -r requirements.txt
 
-**Email**: duc.2373401010100@vanlanguni.vn  
-**GitHub**: [Nhóm 23](https://github.com/Duc-bug/DoanXLAS-Nhom23)
+# Chạy
+streamlit run app.py
+```
+
+## 📞 Liên hệ
+
+- **Email:** duc.2373401010100@vanlanguni.vn
+- **GitHub:** [DoanXLAS-Nhom23](https://github.com/Duc-bug/DoanXLAS-Nhom23)
+- **Demo:** [Streamlit App](https://doanxlas-nhom23-app-nhan-dien-chu-ki.streamlit.app)
 
 ---
-**Nhóm 23 - Đồ án 2025** 
+
+**Nhóm 23 - Đại học Văn Lang 2025** 🎓
