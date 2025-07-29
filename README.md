@@ -77,6 +77,7 @@ streamlit run app.py
 - **Email:** duc.2373401010100@vanlanguni.vn
 - **GitHub:** [DoanXLAS-Nhom23](https://github.com/Duc-bug/DoanXLAS-Nhom23)
 
+Ảnh test bằng termianl <img width="1600" height="869" alt="image" src="https://github.com/user-attachments/assets/15a4ce0b-9094-4cda-9b2e-41bb465488d9" />
 
 ---
 
