@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
-
+import io
 class SignatureProcessor:
     def __init__(self, target_size=(128, 128)):
         self.target_size = target_size
@@ -20,7 +20,7 @@ class SignatureProcessor:
                     raise ValueError(f"Không thể đọc ảnh từ {image_input}")
             elif hasattr(image_input, 'read'):
                 # File object từ Streamlit
-                import io
+                
                 from PIL import Image
                 pil_image = Image.open(image_input)
                 image = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
