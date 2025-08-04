@@ -1,7 +1,7 @@
 # 🖋️ Ứng Dụng Nhận Diện Chữ Ký
 
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://doanxlas-nhom23-app-nhan-dien-chu-ki.streamlit.app)
-
+Phần docs(Báo cáo)https://docs.google.com/document/d/1Zn2rf2VRRDj2FzuR3NKQPUWg_iTrrbAeZ4aKps0FRsE/edit?tab=t.0 
 Ứng dụng web đơn giản để so sánh và xác thực chữ ký bằng xử lý ảnh.
 
 ## ✨ Tính năng
